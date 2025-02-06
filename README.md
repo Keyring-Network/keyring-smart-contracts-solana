@@ -16,4 +16,5 @@ anchor migrate
 ```
 
 # Upgrade authority
-Typically, the keypair that is deploying the contract is upgrade authority.
+Typically, the keypair that is deploying the contract is upgrade authority which can update the program. 
+Each structure in program has version byte which can be used in subsequent upgrade to provide backward compatibility and/or migration.
