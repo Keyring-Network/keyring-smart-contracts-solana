@@ -18,7 +18,7 @@ use revoke_key::*;
 use set_admin::*;
 use unblacklist_entity::*;
 
-declare_id!("4Qk1kBqLjp2HkTyKfqFGSS3xBywxHgysMTYqwsrxc2Wr");
+declare_id!("9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw");
 
 const MESSAGE_PREFIX: &'static [u8] = b"\x19Solana Signed Message:\n";
 

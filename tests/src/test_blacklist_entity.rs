@@ -9,12 +9,12 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use smart_contract_solana::common::types::EntityData;
+use smart_contract_solana::common::types::{EntityData, CURRENT_VERSION};
 use std::str::FromStr;
 
 #[test]
 fn test_blacklist_entity() {
-    let program_id = "4Qk1kBqLjp2HkTyKfqFGSS3xBywxHgysMTYqwsrxc2Wr";
+    let program_id = "9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();
@@ -81,6 +81,33 @@ fn test_blacklist_entity() {
     assert_eq!(
         entity_data,
         EntityData {
+            version: CURRENT_VERSION,
+            blacklisted: true,
+            exp: 0,
+        }
+    );
+
+    // No error must be thrown when we blacklist already blacklisted entity
+    program
+        .request()
+        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+            program_state: program_state_pubkey.clone(),
+            signer: payer.pubkey(),
+            entity_mapping: entity_mapping_pubkey.clone(),
+            system_program: System::id(),
+        })
+        .args(smart_contract_solana::instruction::BlacklistEntity {
+            policy_id,
+            trading_address,
+        })
+        .send()
+        .expect("Admin should be able to blacklist entity");
+
+    let entity_data: EntityData = program.account(entity_mapping_pubkey).unwrap();
+    assert_eq!(
+        entity_data,
+        EntityData {
+            version: CURRENT_VERSION,
             blacklisted: true,
             exp: 0,
         }

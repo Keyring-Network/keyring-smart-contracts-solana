@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{EntityData, ProgramState};
+use crate::common::types::{EntityData, ProgramState, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -43,10 +43,12 @@ pub fn do_blacklist_entity(
     }
 
     if ctx.accounts.entity_mapping.blacklisted {
+        ctx.accounts.entity_mapping.version = CURRENT_VERSION;
         return Ok(());
     }
 
     *ctx.accounts.entity_mapping = EntityData {
+        version: CURRENT_VERSION,
         blacklisted: true,
         exp: 0,
     };

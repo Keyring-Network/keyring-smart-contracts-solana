@@ -11,13 +11,13 @@ use anchor_client::{
 };
 use libsecp256k1::{sign, Message};
 use rand::rngs::OsRng;
-use smart_contract_solana::common::types::{EntityData, ToHash};
+use smart_contract_solana::common::types::{EntityData, ToHash, CURRENT_VERSION};
 use smart_contract_solana::common::verify_auth_message::create_signature_payload;
 use std::str::FromStr;
 
 #[test]
 fn create_credentials() {
-    let program_id = "4Qk1kBqLjp2HkTyKfqFGSS3xBywxHgysMTYqwsrxc2Wr";
+    let program_id = "9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();
@@ -292,6 +292,7 @@ fn create_credentials() {
     assert_eq!(
         entity_data,
         EntityData {
+            version: CURRENT_VERSION,
             blacklisted: false,
             exp: valid_until,
         }
@@ -362,6 +363,7 @@ fn create_credentials() {
     assert_eq!(
         entity_data,
         EntityData {
+            version: CURRENT_VERSION,
             blacklisted: false,
             exp: valid_until,
         }
@@ -386,6 +388,7 @@ fn create_credentials() {
     assert_eq!(
         entity_data,
         EntityData {
+            version: CURRENT_VERSION,
             blacklisted: true,
             exp: 0,
         }
@@ -432,6 +435,7 @@ fn create_credentials() {
     assert_eq!(
         entity_data,
         EntityData {
+            version: CURRENT_VERSION,
             blacklisted: false,
             exp: 0,
         }

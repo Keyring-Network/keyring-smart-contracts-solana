@@ -12,7 +12,7 @@ use std::str::FromStr;
 
 #[test]
 fn test_set_admin() {
-    let program_id = "4Qk1kBqLjp2HkTyKfqFGSS3xBywxHgysMTYqwsrxc2Wr";
+    let program_id = "9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();

@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{EntityData, KeyEntry, ProgramState, ToHash};
+use crate::common::types::{EntityData, KeyEntry, ProgramState, ToHash, CURRENT_VERSION};
 use crate::common::verify_auth_message::verify_auth_message;
 use anchor_lang::prelude::*;
 use anchor_lang::{system_program, Accounts};
@@ -99,6 +99,7 @@ pub fn do_create_credential(
         return Err(error!(KeyringError::ErrInvalidCredentials));
     }
     ctx.accounts.entity_mapping.exp = valid_until;
+    ctx.accounts.entity_mapping.version = CURRENT_VERSION;
 
     emit!(CredentialsCreated {
         key,

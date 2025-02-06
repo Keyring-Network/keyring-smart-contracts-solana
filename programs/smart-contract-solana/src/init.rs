@@ -1,4 +1,4 @@
-use crate::common::types::ProgramState;
+use crate::common::types::{ProgramState, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -23,7 +23,11 @@ pub struct Initialize<'info> {
 }
 
 pub fn do_initialize(ctx: Context<Initialize>) -> Result<()> {
-    ctx.accounts.program_state.admin = ctx.accounts.signer.key.clone();
+    *ctx.accounts.program_state = ProgramState {
+        version: CURRENT_VERSION,
+        admin: ctx.accounts.signer.key.clone(),
+    };
+
     emit!(Initialized {
         admin: ctx.accounts.signer.key.clone()
     });

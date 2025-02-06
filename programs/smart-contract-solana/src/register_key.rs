@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{KeyEntry, ProgramState, ToHash};
+use crate::common::types::{KeyEntry, ProgramState, ToHash, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::secp256k1_recover::SECP256K1_PUBLIC_KEY_LENGTH;
 use anchor_lang::Accounts;
@@ -64,6 +64,7 @@ pub fn do_register_key(
     }
 
     *ctx.accounts.key_mapping = KeyEntry {
+        version: CURRENT_VERSION,
         is_valid: true,
         valid_from,
         valid_to,
