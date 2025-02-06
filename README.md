@@ -1,7 +1,20 @@
 # Description
 This solana program is adaption of [solidity smart contracts](https://github.com/Keyring-Network/smart-contracts) and is base on Anchor framework.
 
-# Run tests
+# Installation
+Install solana and anchor cli from the [official website](https://www.anchor-lang.com/docs/installation).
+Ensure to install solana using the official documentation. The homebrew installation is not recommended and can cause an issue relating to `cargo-build-sbf` missing.
+
+# Tests
+
+## Setup
+You will need a solana keypair to run tests.
+
+```shell
+solana-keygen new
+```
+
+## Run tests
 ```shell
 ./run-tests.sh
 ```
