@@ -1,4 +1,5 @@
 mod blacklist_entity;
+mod check_credentials;
 mod collect_fees;
 pub mod common;
 mod create_credential;
@@ -10,6 +11,7 @@ mod unblacklist_entity;
 
 use anchor_lang::prelude::*;
 use blacklist_entity::*;
+use check_credentials::*;
 use collect_fees::*;
 use create_credential::*;
 use init::*;
@@ -89,5 +91,13 @@ pub mod smart_contract_solana {
             cost,
             backdoor,
         )
+    }
+
+    pub fn check_credential(
+        ctx: Context<CheckCredential>,
+        policy_id: u64,
+        trading_address: Pubkey,
+    ) -> Result<()> {
+        do_check_credential(ctx, policy_id, trading_address)
     }
 }

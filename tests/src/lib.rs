@@ -16,3 +16,6 @@ mod test_revoke_key;
 mod test_set_admin;
 #[cfg(test)]
 mod test_unblacklist_entity;
+
+#[cfg(test)]
+mod test_check_credential;

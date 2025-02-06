@@ -20,4 +20,6 @@ pub enum KeyringError {
     ErrKeyAlreadyRegistered,
     #[msg("Cost parameter is zero")]
     ErrCostParameterZero,
+    #[msg("error while checking credentials")]
+    ErrInCheckingCredentials,
 }

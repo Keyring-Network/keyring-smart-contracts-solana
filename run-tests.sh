@@ -29,3 +29,6 @@ anchor test test_create_credentials --skip-build
 sleep 5s
 
 anchor test test_collect_fees --skip-build
+sleep 5s
+
+anchor test test_check_credential --skip-build
