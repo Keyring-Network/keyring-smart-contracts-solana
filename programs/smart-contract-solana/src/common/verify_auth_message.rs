@@ -96,6 +96,17 @@ pub fn convert_to_eth_signed_message_hash(message_hash: Hash) -> Hash {
 }
 
 // Packs auth message data
+// This function mimics the exact same behaviour as this from solditiy:
+// return abi.encodePacked(
+//    tradingAddress,
+//    uint8(0),
+//    uint24(policyId),
+//    uint32(validFrom),
+//    uint32(validUntil),
+//    uint160(cost),
+//    backdoor
+// );
+// See full code here: https://github.com/Keyring-Network/smart-contracts/blob/master/src/lib/RsaMessagePacking.sol#L18
 pub fn pack_auth_message(
     trading_address: Vec<u8>,
     policy_id: u64,

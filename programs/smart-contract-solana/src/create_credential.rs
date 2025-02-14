@@ -66,6 +66,9 @@ pub fn do_create_credential(
     );
     system_program::transfer(cpi_context, cost)?;
 
+    // We are hashing and truncating the trading pubkey to last 20 bytes
+    // in order to match message packing on ethereum as ethereum addresses are
+    // 20 bytes.
     let trading_address_bytes = trading_address.to_bytes();
     let trading_address_hash = keccak::hash(&trading_address_bytes).to_bytes();
     let truncated_trading_address = trading_address_hash[..20].to_vec();
