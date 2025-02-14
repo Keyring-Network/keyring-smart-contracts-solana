@@ -1,6 +1,6 @@
 use anchor_lang::account;
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::blake3::{hash, Hash};
+use anchor_lang::solana_program::keccak::{hash, Hash};
 
 pub const CURRENT_VERSION: u8 = 1;
 
