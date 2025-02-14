@@ -1,29 +1,35 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{AuthMessage, AuthMessageV1};
-use crate::MESSAGE_PREFIX;
-use anchor_lang::prelude::Pubkey;
 use anchor_lang::solana_program::keccak;
 use anchor_lang::solana_program::keccak::Hash;
 use anchor_lang::solana_program::secp256k1_recover::{
     secp256k1_recover, Secp256k1Pubkey, SECP256K1_PUBLIC_KEY_LENGTH, SECP256K1_SIGNATURE_LENGTH,
 };
-use anchor_lang::{error, AnchorSerialize};
+use anchor_lang::{error, Result};
 
-fn split_signature(signature_data: Vec<u8>) -> anchor_lang::Result<(Vec<u8>, u8)> {
+pub const ETH_SIGNED_MESSAGE_PREFIX: &[u8] = b"\x19Ethereum Signed Message:\n32";
+
+pub fn split_signature(signature_data: Vec<u8>) -> Result<(Vec<u8>, u8)> {
     if signature_data.len() != SECP256K1_SIGNATURE_LENGTH + 1 {
         return Err(error!(KeyringError::ErrInvalidSignatureLength));
     }
 
-    let recovery_id = *signature_data
+    let mut recovery_id = *signature_data
         .last()
         .expect("We already checked that the length is 65 above; qed");
+
+    // We expect recovery id similar to ethereum rpc
+    if recovery_id >= 27 && recovery_id < 27 + 4 {
+        recovery_id = recovery_id - 27;
+    } else {
+        return Err(error!(KeyringError::ErrInvalidRecoveryID));
+    }
 
     let signature = signature_data[0..64].to_vec();
 
     Ok((signature, recovery_id))
 }
 
-fn parse_publickey(key: Vec<u8>) -> anchor_lang::Result<Secp256k1Pubkey> {
+fn parse_publickey(key: Vec<u8>) -> Result<Secp256k1Pubkey> {
     if key.len() != SECP256K1_PUBLIC_KEY_LENGTH {
         return Err(error!(KeyringError::ErrInvalidPubkeyLength));
     }
@@ -35,13 +41,13 @@ fn parse_publickey(key: Vec<u8>) -> anchor_lang::Result<Secp256k1Pubkey> {
 pub fn verify_auth_message(
     key: Vec<u8>,
     policy_id: u64,
-    trading_address: Pubkey,
+    trading_address: Vec<u8>,
     signature_data: Vec<u8>,
     valid_from: u64,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
-) -> anchor_lang::Result<bool> {
+) -> Result<bool> {
     // Pack auth message
     let provided_signer = parse_publickey(key)?;
     let message_hash = create_signature_payload(
@@ -60,13 +66,13 @@ pub fn verify_auth_message(
 }
 
 pub fn create_signature_payload(
-    trading_address: Pubkey,
+    trading_address: Vec<u8>,
     policy_id: u64,
     valid_from: u64,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
-) -> anchor_lang::Result<Hash> {
+) -> Result<Hash> {
     let packed_message = pack_auth_message(
         trading_address,
         policy_id,
@@ -75,32 +81,59 @@ pub fn create_signature_payload(
         cost,
         backdoor,
     )?;
-    Ok(keccak::hash(packed_message.as_slice()))
+
+    let message_hash = keccak::hash(packed_message.as_slice());
+    let eth_signed_message_hash = convert_to_eth_signed_message_hash(message_hash);
+
+    Ok(eth_signed_message_hash)
+}
+
+pub fn convert_to_eth_signed_message_hash(message_hash: Hash) -> Hash {
+    let mut buffer = vec![];
+    buffer.extend_from_slice(&ETH_SIGNED_MESSAGE_PREFIX);
+    buffer.extend_from_slice(message_hash.as_ref());
+    keccak::hash(buffer.as_slice())
 }
 
 // Packs auth message data
-fn pack_auth_message(
-    trading_address: Pubkey,
+pub fn pack_auth_message(
+    trading_address: Vec<u8>,
     policy_id: u64,
     valid_from: u64,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
-) -> anchor_lang::Result<Vec<u8>> {
-    let mut serialized_auth_message = vec![];
-    let mut buffer = vec![];
-    let auth_message = AuthMessage::V1(AuthMessageV1 {
-        trading_address,
-        policy_id,
-        valid_from,
-        valid_until,
-        cost,
-        backdoor,
-    });
-    auth_message
-        .serialize(&mut serialized_auth_message)
-        .map_err(|_| error!(KeyringError::ErrUnableToPackAuthMessage))?;
-    buffer.append(&mut MESSAGE_PREFIX.to_vec());
-    buffer.append(&mut serialized_auth_message);
-    Ok(buffer)
+) -> Result<Vec<u8>> {
+    let mut packed = vec![];
+
+    let reserved_byte = 0u8;
+
+    if policy_id > 2u64.pow(24) - 1 {
+        return Err(error!(KeyringError::ErrAuthMessageParameterOutOfRange));
+    }
+    let policy_id_in_bytes = policy_id.to_be_bytes();
+    let encoded_policy_id =
+        policy_id_in_bytes[policy_id_in_bytes.len() - 3..policy_id_in_bytes.len()].to_vec();
+
+    if valid_from > u32::MAX as u64 {
+        return Err(error!(KeyringError::ErrAuthMessageParameterOutOfRange));
+    }
+    let encoded_valid_from = (valid_from as u32).to_be_bytes().to_vec();
+
+    if valid_until > u32::MAX as u64 {
+        return Err(error!(KeyringError::ErrAuthMessageParameterOutOfRange));
+    }
+    let encoded_valid_until = (valid_until as u32).to_be_bytes().to_vec();
+    let encoded_cost = (cost as u128).to_be_bytes().to_vec();
+
+    packed.extend_from_slice(&trading_address.as_slice());
+    packed.push(reserved_byte);
+    packed.extend_from_slice(&encoded_policy_id.as_slice());
+    packed.extend_from_slice(&encoded_valid_from.as_slice());
+    packed.extend_from_slice(&encoded_valid_until.as_slice());
+    packed.extend_from_slice(vec![0u8; 4].as_slice());
+    packed.extend_from_slice(&encoded_cost.as_slice());
+    packed.extend_from_slice(backdoor.as_slice());
+
+    Ok(packed)
 }

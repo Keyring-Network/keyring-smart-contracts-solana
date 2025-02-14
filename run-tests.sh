@@ -32,3 +32,6 @@ anchor test test_collect_fees --skip-build
 sleep 5s
 
 anchor test test_check_credential --skip-build
+sleep 5s
+
+anchor test test_verify_auth_message --skip-build

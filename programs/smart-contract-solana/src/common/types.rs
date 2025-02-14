@@ -47,18 +47,3 @@ pub struct EntityData {
 impl EntityData {
     pub const MAX_SIZE: usize = 1 + 8 + 1;
 }
-
-#[derive(borsh::BorshSerialize)]
-pub enum AuthMessage {
-    V1(AuthMessageV1),
-}
-
-#[derive(borsh::BorshSerialize)]
-pub struct AuthMessageV1 {
-    pub trading_address: Pubkey,
-    pub policy_id: u64,
-    pub valid_from: u64,
-    pub valid_until: u64,
-    pub cost: u64,
-    pub backdoor: Vec<u8>,
-}

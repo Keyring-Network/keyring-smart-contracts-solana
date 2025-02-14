@@ -1,6 +1,8 @@
 use anchor_client::anchor_lang::prelude::{Clock, Pubkey, System};
 use anchor_client::anchor_lang::Id;
 use anchor_client::solana_client::rpc_client::RpcClient;
+use anchor_client::solana_sdk::keccak;
+use anchor_client::solana_sdk::secp256k1_recover::Secp256k1Pubkey;
 use anchor_client::solana_sdk::signature::{Keypair, Signer};
 use anchor_client::solana_sdk::sysvar::clock;
 use anchor_client::Program;
@@ -56,4 +58,14 @@ pub fn get_timestamp(rpc: &RpcClient) -> u64 {
     let clock = rpc.get_account(&clock::ID).unwrap();
     let clock_sysvar: Clock = bincode::deserialize(&clock.data).unwrap();
     clock_sysvar.unix_timestamp.try_into().unwrap()
+}
+
+pub fn convert_pubkey_to_address(pubkey: &Pubkey) -> Vec<u8> {
+    let hashed_pubkey = keccak::hash(&pubkey.to_bytes()).to_bytes();
+    hashed_pubkey[..20].to_vec()
+}
+
+pub fn convert_secp_pubkey_to_address(pubkey: &Secp256k1Pubkey) -> Vec<u8> {
+    let hashed_pubkey = keccak::hash(&pubkey.to_bytes()).to_bytes();
+    hashed_pubkey[12..].to_vec()
 }

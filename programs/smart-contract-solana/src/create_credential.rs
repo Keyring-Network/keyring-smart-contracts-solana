@@ -2,6 +2,7 @@ use crate::common::error::KeyringError;
 use crate::common::types::{EntityData, KeyEntry, ProgramState, ToHash, CURRENT_VERSION};
 use crate::common::verify_auth_message::verify_auth_message;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::keccak;
 use anchor_lang::{system_program, Accounts};
 
 #[event]
@@ -65,10 +66,14 @@ pub fn do_create_credential(
     );
     system_program::transfer(cpi_context, cost)?;
 
+    let trading_address_bytes = trading_address.to_bytes();
+    let trading_address_hash = keccak::hash(&trading_address_bytes).to_bytes();
+    let truncated_trading_address = trading_address_hash[..20].to_vec();
+
     if !verify_auth_message(
         key.clone(),
         policy_id,
-        trading_address,
+        truncated_trading_address,
         signature,
         valid_from,
         valid_until,

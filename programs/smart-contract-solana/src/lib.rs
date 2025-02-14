@@ -22,8 +22,6 @@ use unblacklist_entity::*;
 
 declare_id!("9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw");
 
-const MESSAGE_PREFIX: &'static [u8] = b"\x19Solana Signed Message:\n";
-
 #[program]
 pub mod smart_contract_solana {
     use super::*;

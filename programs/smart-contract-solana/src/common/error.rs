@@ -12,6 +12,8 @@ pub enum KeyringError {
     ErrUnableToPackAuthMessage,
     #[msg("Invalid signature length")]
     ErrInvalidSignatureLength,
+    #[msg("Invalid recovery id")]
+    ErrInvalidRecoveryID,
     #[msg("Invalid pubkey length")]
     ErrInvalidPubkeyLength,
     #[msg("Invalid signature")]
@@ -22,4 +24,6 @@ pub enum KeyringError {
     ErrCostParameterZero,
     #[msg("error while checking credentials")]
     ErrInCheckingCredentials,
+    #[msg("Error auth message parameter out of range")]
+    ErrAuthMessageParameterOutOfRange,
 }

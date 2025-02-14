@@ -1,4 +1,4 @@
-use crate::common::{get_timestamp, init_program};
+use crate::common::{convert_pubkey_to_address, get_timestamp, init_program};
 use anchor_client::anchor_lang::prelude::System;
 use anchor_client::anchor_lang::Id;
 use anchor_client::solana_client::rpc_client::RpcClient;
@@ -84,7 +84,7 @@ fn collect_fees() {
         Pubkey::find_program_address(&entity_mapping_seeds, &program.id());
 
     let packed_message = create_signature_payload(
-        trading_address.clone(),
+        convert_pubkey_to_address(&trading_address),
         policy_id,
         valid_from,
         valid_until,
@@ -94,7 +94,7 @@ fn collect_fees() {
     .unwrap();
     let message = Message::parse_slice(packed_message.as_ref()).unwrap();
     let (signature, recovery_id) = sign(&message, &secret_key);
-    let serialized_recovery_id = recovery_id.serialize();
+    let serialized_recovery_id = recovery_id.serialize() + 27u8;
     let mut serialized_signature = signature.serialize().to_vec();
     serialized_signature.push(serialized_recovery_id);
 
