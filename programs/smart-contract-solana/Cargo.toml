@@ -20,4 +20,5 @@ anchor-debug = []
 [dependencies]
 anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
 log = "0.4.25"
+solana-security-txt = "1.1.1"
 
