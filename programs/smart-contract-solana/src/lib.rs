@@ -19,17 +19,6 @@ use register_key::*;
 use revoke_key::*;
 use set_admin::*;
 use unblacklist_entity::*;
-use solana_security_txt::security_txt;
-
-security_txt! {
-    name: "Keyring Network",
-    project_url: "https://Keyring.Network",
-    contacts: "email:info@keyring.network",
-    policy: "https://github.com/Keyring-Network/smart-contracts-solana/SECURITY.md",
-    preferred_languages: "en",
-    source_code: "https://github.com/Keyring-Network/smart-contracts-solana",
-    auditors: "None"
-}
 
 declare_id!("9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw");
 

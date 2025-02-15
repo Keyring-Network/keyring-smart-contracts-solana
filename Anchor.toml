@@ -11,8 +11,8 @@ smart_contract_solana = "9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "mainnet"  # or "https://api.mainnet-beta.solana.com"
-wallet = "./deploy-keypair.json"
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "cargo test"

@@ -15,7 +15,3 @@ codegen-units = 1
 opt-level = 3
 incremental = false
 codegen-units = 1
-
-[provider]
-cluster = "mainnet"  # or "https://api.mainnet-beta.solana.com"
-wallet = "/Users/amc/Documents/code/gitLibs/keyring/smart-contracts-solana/deploy-keypair.json"
