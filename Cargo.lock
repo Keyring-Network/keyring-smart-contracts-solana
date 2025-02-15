@@ -3456,6 +3456,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "log",
+ "solana-security-txt",
 ]
 
 [[package]]
