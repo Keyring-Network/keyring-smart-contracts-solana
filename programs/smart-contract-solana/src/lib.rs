@@ -31,7 +31,7 @@ security_txt! {
     auditors: "None"
 }
 
-declare_id!("8nEhHV6DVRBV4kdnDkpwNoCs4h96DtALspn4Tt8VKn2E");
+declare_id!("5fZSnBq1knqzPUvt4LRoFHEysaWxiS2wRDdT1yTkMtav");
 
 #[program]
 pub mod smart_contract_solana {
