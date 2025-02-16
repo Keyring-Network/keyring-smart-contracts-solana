@@ -12,15 +12,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Program Upgrade via Squads
-        uses: Squads-Protocol/squads-v4-program-upgrade@main
+      - name: Checkout Squads Action
+        uses: actions/checkout@v4
         with:
-          network-url: "https://solana-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          multisig-pda: ${{ vars.MULTISIG }}
-          multisig-vault-index: "0"
-          program-id: ${{ vars.PROGRAM_ID }}
-          buffer: ${{ vars.BUFFER_ADDRESS }}
-          spill-address: ${{ vars.SPILL_ADDRESS }}
-          name: "Keyring Network Program Upgrade"
-          executable-data: ${{ vars.EXECUTABLE_DATA }}
-          keypair: ${{ secrets.DEPLOYER_KEYPAIR }} 
+          repository: Squads-Protocol/squads-v4-program-upgrade
+          ref: main
+          path: squads-action
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build and Run Squads Action
+        working-directory: squads-action
+        env:
+          NETWORK_URL: "https://solana-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          MULTISIG_PDA: ${{ vars.MULTISIG }}
+          MULTISIG_VAULT_INDEX: "0"
+          PROGRAM_ID: ${{ vars.PROGRAM_ID }}
+          BUFFER: ${{ vars.BUFFER_ADDRESS }}
+          SPILL_ADDRESS: ${{ vars.SPILL_ADDRESS }}
+          NAME: "Keyring Network Program Upgrade"
+          EXECUTABLE_DATA: ${{ vars.EXECUTABLE_DATA }}
+          KEYPAIR: ${{ secrets.DEPLOYER_KEYPAIR }}
+          IDL_BUFFER: ""  # Optional, set if needed
+        run: |
+          npm install
+          npm run build
+          npm run dev
+        shell: bash 
