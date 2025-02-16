@@ -27,8 +27,9 @@ jobs:
       - name: Build and Run Squads Action
         working-directory: squads-action
         env:
+          NODE_OPTIONS: "--max-old-space-size=8192"  # Increase memory limit
           NETWORK_URL: "https://solana-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          MULTISIG_PDA: ${{ vars.MULTISIG }}
+          MULTISIG_PDA: ${{ vars.MULTISIG_PDA }}
           MULTISIG_VAULT_INDEX: "0"
           PROGRAM_ID: ${{ vars.PROGRAM_ID }}
           BUFFER: ${{ vars.BUFFER_ADDRESS }}
