@@ -14,26 +14,36 @@ import {
 } from "@coral-xyz/anchor";
 
 module.exports = async function (provider) {
-  // Configure client to use the provider.
-  anchor.setProvider(provider);
+    console.log("Starting deployment...");
+    
+    // Configure client to use the provider.
+    anchor.setProvider(provider);
+    console.log("Provider configured");
+    
+    const program = workspace.KeyringNetwork as Program<KeyringNetwork>;
+    console.log("Program ID:", program.programId.toString());
+    console.log("Program loaded");
 
-  // Add your deploy script here.
-  const program =
-      workspace.KeyringNetwork as Program<KeyringNetwork>;
+    const [programStatePubkey] = await web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("keyring_program"), Buffer.from("global_state")],
+        program.programId
+    );
+    console.log("PDA derived:", programStatePubkey.toString());
 
-  const [programStatePubkey] = await web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("keyring_program"), Buffer.from("global_state")],
-      program.programId
-  );
-
-  const txHash = await program.methods
-      .initialize()
-      .accounts({})
-      .rpc({ commitment: "finalized" });
-
-  console.log("Initialize tx sent. Hash: ", txHash);
-
-  const programStateAccount = await program.account.programState.fetch(programStatePubkey);
-  console.log("Program state is: ", programStateAccount);
-  console.log("Admin is:", programStateAccount.admin.toString());
+    try {
+        console.log("Sending initialize transaction...");
+        const txHash = await program.methods
+        .initialize()
+        .accounts({})
+        .rpc({ commitment: "finalized" });
+        console.log("Initialize tx sent. Hash: ", txHash);
+        
+        console.log("Fetching program state...");
+        const programStateAccount = await program.account.programState.fetch(programStatePubkey);
+        console.log("Program state is: ", programStateAccount);
+        console.log("Admin is:", programStateAccount.admin.toString());
+    } catch (e) {
+        console.error("Error details:", e);
+        throw e;
+    }
 };
