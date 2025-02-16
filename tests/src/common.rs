@@ -6,7 +6,7 @@ use anchor_client::solana_sdk::secp256k1_recover::Secp256k1Pubkey;
 use anchor_client::solana_sdk::signature::{Keypair, Signer};
 use anchor_client::solana_sdk::sysvar::clock;
 use anchor_client::Program;
-use smart_contract_solana::common::types::ProgramState;
+use keyring_network::common::types::ProgramState;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -22,24 +22,24 @@ pub fn init_program(program: &Program<&Keypair>, payer: &Keypair) -> (Pubkey, Pr
     // First initialization should be successful
     program
         .request()
-        .accounts(smart_contract_solana::accounts::Initialize {
+        .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::Initialize {})
+        .args(keyring_network::instruction::Initialize {})
         .send()
         .expect("First initialization must be successful");
 
     // Second initialization should return an error
     program
         .request()
-        .accounts(smart_contract_solana::accounts::Initialize {
+        .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::Initialize {})
+        .args(keyring_network::instruction::Initialize {})
         .send()
         .expect_err("Second initialization should not be successful");
 

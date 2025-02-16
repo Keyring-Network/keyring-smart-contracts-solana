@@ -11,8 +11,8 @@ use anchor_client::{
 };
 use libsecp256k1::{sign, Message};
 use rand::rngs::OsRng;
-use smart_contract_solana::common::types::{EntityData, ToHash, CURRENT_VERSION};
-use smart_contract_solana::common::verify_auth_message::create_signature_payload;
+use keyring_network::common::types::{EntityData, ToHash, CURRENT_VERSION};
+use keyring_network::common::verify_auth_message::create_signature_payload;
 use std::str::FromStr;
 
 #[test]
@@ -52,13 +52,13 @@ fn create_credentials() {
     let timestamp = get_timestamp(&rpc);
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RegisterKey {
+        .accounts(keyring_network::accounts::RegisterKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RegisterKey {
+        .args(keyring_network::instruction::RegisterKey {
             key: key.clone(),
             valid_from: timestamp - 1,
             valid_to: timestamp + 20,
@@ -101,14 +101,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -154,14 +154,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -207,14 +207,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -262,14 +262,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -333,14 +333,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -372,13 +372,13 @@ fn create_credentials() {
     // Blacklisted entity cannot be used to create credentials
     program
         .request()
-        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+        .accounts(keyring_network::accounts::BlacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::BlacklistEntity {
+        .args(keyring_network::instruction::BlacklistEntity {
             policy_id,
             trading_address,
         })
@@ -396,14 +396,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -419,13 +419,13 @@ fn create_credentials() {
     // Once we unblacklist the entity it could be used once again
     program
         .request()
-        .accounts(smart_contract_solana::accounts::UnblacklistEntity {
+        .accounts(keyring_network::accounts::UnblacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::UnblacklistEntity {
+        .args(keyring_network::instruction::UnblacklistEntity {
             policy_id,
             trading_address,
         })
@@ -443,14 +443,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -466,13 +466,13 @@ fn create_credentials() {
     // If we revoke the key, we will not be able to create credentials based on it.
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RevokeKey {
+        .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RevokeKey { key: key.clone() })
+        .args(keyring_network::instruction::RevokeKey { key: key.clone() })
         .send()
         .expect("Admin must be allowed to revoke key");
 
@@ -509,14 +509,14 @@ fn create_credentials() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,

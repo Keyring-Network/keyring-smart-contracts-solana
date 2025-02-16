@@ -9,7 +9,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use smart_contract_solana::common::types::{EntityData, CURRENT_VERSION};
+use keyring_network::common::types::{EntityData, CURRENT_VERSION};
 use std::str::FromStr;
 
 #[test]
@@ -48,13 +48,13 @@ fn test_blacklist_entity() {
     // Non admin should not be able to call blacklist entity
     program
         .request()
-        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+        .accounts(keyring_network::accounts::BlacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: dummy_payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::BlacklistEntity {
+        .args(keyring_network::instruction::BlacklistEntity {
             policy_id,
             trading_address,
         })
@@ -64,13 +64,13 @@ fn test_blacklist_entity() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+        .accounts(keyring_network::accounts::BlacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::BlacklistEntity {
+        .args(keyring_network::instruction::BlacklistEntity {
             policy_id,
             trading_address,
         })
@@ -90,13 +90,13 @@ fn test_blacklist_entity() {
     // No error must be thrown when we blacklist already blacklisted entity
     program
         .request()
-        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+        .accounts(keyring_network::accounts::BlacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::BlacklistEntity {
+        .args(keyring_network::instruction::BlacklistEntity {
             policy_id,
             trading_address,
         })

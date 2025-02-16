@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-keyring_network = "hLkXzcA2hSRraTD57UhpihoBHQD6bKJiZ4oyU7v6QKx"
+keyring_network = "DZfyn6cuo3aKnW8Diky5fzYWvuWZxFDi1VQekfJf45Vw"
 
 [programs.mainnet]
-keyring_network = "hLkXzcA2hSRraTD57UhpihoBHQD6bKJiZ4oyU7v6QKx"
+keyring_network = "DZfyn6cuo3aKnW8Diky5fzYWvuWZxFDi1VQekfJf45Vw"
 
 [programs.devnet]
-keyring_network = "hLkXzcA2hSRraTD57UhpihoBHQD6bKJiZ4oyU7v6QKx"
+keyring_network = "DZfyn6cuo3aKnW8Diky5fzYWvuWZxFDi1VQekfJf45Vw"
 
 [registry]
 url = "https://api.apr.dev"

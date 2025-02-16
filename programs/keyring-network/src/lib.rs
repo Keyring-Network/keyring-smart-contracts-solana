@@ -31,10 +31,10 @@ security_txt! {
     auditors: "None"
 }
 
-declare_id!("5fZSnBq1knqzPUvt4LRoFHEysaWxiS2wRDdT1yTkMtav");
+declare_id!("DZfyn6cuo3aKnW8Diky5fzYWvuWZxFDi1VQekfJf45Vw");
 
 #[program]
-pub mod smart_contract_solana {
+pub mod keyring_network {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {

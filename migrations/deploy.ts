@@ -3,7 +3,7 @@
 // configured from the workspace's Anchor.toml.
 
 const anchor = require("@coral-xyz/anchor");
-import { SmartContractSolana } from "../target/types/smart_contract_solana";
+import { KeyringNetwork } from "../target/types/keyring_network";
 import {
   Program,
   setProvider,
@@ -19,7 +19,7 @@ module.exports = async function (provider) {
 
   // Add your deploy script here.
   const program =
-      workspace.SmartContractSolana as Program<SmartContractSolana>;
+      workspace.KeyringNetwork as Program<KeyringNetwork>;
 
   const [programStatePubkey] = await web3.PublicKey.findProgramAddressSync(
       [Buffer.from("keyring_program"), Buffer.from("global_state")],

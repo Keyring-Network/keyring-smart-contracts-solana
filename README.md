@@ -36,31 +36,57 @@ Each structure in program has version byte which can be used in subsequent upgra
 
 ## Prerequisites
 ```bash
-# Build the verifiable program
 anchor build --verifiable
-
-# Verify the program matches what's deployed
-solana program dump <PROGRAM_ID> deployed-program.so
-sha256sum deployed-program.so target/verifiable/smart_contract_solana.so
 ```
-Create a deployment keypair at `./deploy-keypair.json`
-Fund the deployment account (needs ~8 SOL)
+Create a deployment keypair for example at `$DEPLOYMENT_KEYPAIR`
+Fund the deployment account (needs ~4 SOL)
 
 ## Initial Deployment
 
 Deploy the program
 ```bash
-anchor deploy
+anchor deploy --verifiable \
+  --program-name keyring_network \
+  --program-keypair $PROGRAM_KEYPAIR \
+  --provider.cluster $PROVIDER_CLUSTER \
+  --provider.wallet $PROGRAM_WALLET \
+  -- \
+  --with-compute-unit-price 50000 \
+  --max-sign-attempts 100 \
+  --use-rpc
 ```
+
 Initialize the program state (only needed for first deployment)
 ```bash
-anchor migrate
+anchor migrate \
+  --provider.cluster $PROVIDER_CLUSTER \
+  --provider.wallet $PROGRAM_WALLET
 ```
 
 ## Upgrading Existing Program
 ```bash
 # Build verifiable version
 anchor build --verifiable
+
+# Deploy the upgrade
+anchor deploy --verifiable \
+  --program-name keyring_network \
+  --program-keypair $PROGRAM_KEYPAIR \
+  --provider.cluster $PROVIDER_CLUSTER \
+  --provider.wallet $PROGRAM_WALLET \
+  -- \
+  --with-compute-unit-price 50000 \
+  --max-sign-attempts 100 \
+  --use-rpc
+```
+
+Hand off to Squad
+```
+solana program set-upgrade-authority $PROGRAM_ID \
+  --url $PROVIDER_CLUSTER \
+  --keypair $PROGRAM_WALLET \
+  --new-upgrade-authority $SQUAD_KEYPAIR \
+  --skip-new-upgrade-authority-signer-check
 ```
 
 ## Error Handling
@@ -73,17 +99,19 @@ Enter the seed phrase from the error message.
 
 Close failed buffer to reclaim rent:
 ```bash
-solana program close $(solana program show --buffers --keypair ./deploy-keypair.json | awk 'NR==3 {print $1}') \
-  --keypair ./deploy-keypair.json \
-  --recipient $(solana-keygen pubkey ./deploy-keypair.json)
+solana program close $(solana program show --buffers --keypair $DEPLOYMENT_KEYPAIR | awk 'NR==3 {print $1}') \
+  --keypair $DEPLOYMENT_KEYPAIR \
+  --url $PROVIDER_CLUSTER \
+  --recipient $(solana-keygen pubkey $DEPLOYMENT_KEYPAIR)
 ```
 
 Deploy upgrade with longer timeout and finalized commitment
 ```bash
 solana program deploy \
-  --program-id <PROGRAM_ID> \
-  --keypair ./deploy-keypair.json \
-  target/verifiable/smart_contract_solana.so \
+  --program-id $PROGRAM_ID \
+  --keypair $DEPLOYMENT_KEYPAIR \
+  target/verifiable/keyring_network.so \
+  --url $PROVIDER_CLUSTER \
   --commitment finalized
 ```
 

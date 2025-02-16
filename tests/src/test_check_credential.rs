@@ -11,8 +11,8 @@ use anchor_client::{
 };
 use libsecp256k1::{sign, Message};
 use rand::rngs::OsRng;
-use smart_contract_solana::common::types::{EntityData, ToHash, CURRENT_VERSION};
-use smart_contract_solana::common::verify_auth_message::create_signature_payload;
+use keyring_network::common::types::{EntityData, ToHash, CURRENT_VERSION};
+use keyring_network::common::verify_auth_message::create_signature_payload;
 use std::str::FromStr;
 
 #[test]
@@ -52,13 +52,13 @@ fn test_check_credential() {
     let timestamp = get_timestamp(&rpc);
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RegisterKey {
+        .accounts(keyring_network::accounts::RegisterKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RegisterKey {
+        .args(keyring_network::instruction::RegisterKey {
             key: key.clone(),
             valid_from: timestamp - 1,
             valid_to: timestamp + 20,
@@ -99,14 +99,14 @@ fn test_check_credential() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CreateCredential {
+        .accounts(keyring_network::accounts::CreateCredential {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::CreateCredential {
+        .args(keyring_network::instruction::CreateCredential {
             key: key.clone(),
             policy_id,
             trading_address,
@@ -122,11 +122,11 @@ fn test_check_credential() {
     // Check credentials should be successful here
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CheckCredential {
+        .accounts(keyring_network::accounts::CheckCredential {
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
         })
-        .args(smart_contract_solana::instruction::CheckCredential {
+        .args(keyring_network::instruction::CheckCredential {
             policy_id,
             trading_address,
         })
@@ -135,13 +135,13 @@ fn test_check_credential() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::BlacklistEntity {
+        .accounts(keyring_network::accounts::BlacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::BlacklistEntity {
+        .args(keyring_network::instruction::BlacklistEntity {
             policy_id,
             trading_address,
         })
@@ -161,11 +161,11 @@ fn test_check_credential() {
     // Check credentials should return error for blacklisted entity
     program
         .request()
-        .accounts(smart_contract_solana::accounts::CheckCredential {
+        .accounts(keyring_network::accounts::CheckCredential {
             signer: payer.pubkey(),
             entity_mapping: entity_mapping_pubkey.clone(),
         })
-        .args(smart_contract_solana::instruction::CheckCredential {
+        .args(keyring_network::instruction::CheckCredential {
             policy_id,
             trading_address,
         })

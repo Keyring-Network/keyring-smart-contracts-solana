@@ -7,7 +7,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use smart_contract_solana::common::types::ProgramState;
+use keyring_network::common::types::ProgramState;
 use std::str::FromStr;
 
 #[test]
@@ -35,11 +35,11 @@ fn test_set_admin() {
     // Non admin should not be able to call set_admin
     program
         .request()
-        .accounts(smart_contract_solana::accounts::SetAdmin {
+        .accounts(keyring_network::accounts::SetAdmin {
             program_state: program_state_pubkey.clone(),
             signer: new_admin.pubkey(),
         })
-        .args(smart_contract_solana::instruction::SetAdmin {
+        .args(keyring_network::instruction::SetAdmin {
             new_admin: new_admin.pubkey(),
         })
         .payer(&new_admin)
@@ -48,11 +48,11 @@ fn test_set_admin() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::SetAdmin {
+        .accounts(keyring_network::accounts::SetAdmin {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
         })
-        .args(smart_contract_solana::instruction::SetAdmin {
+        .args(keyring_network::instruction::SetAdmin {
             new_admin: new_admin.pubkey(),
         })
         .send()

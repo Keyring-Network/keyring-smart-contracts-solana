@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 anchor-client = { version = "0.30.1"}
-smart-contract-solana = { version = "0.1.0", path = "../programs/smart-contract-solana" }
+keyring-network = { version = "0.1.0", path = "../programs/keyring-network" }
 bincode = "1.3.3"
 libsecp256k1 = "0.6.0"
 rand = "0.7.3"

@@ -11,7 +11,7 @@ use anchor_client::{
     Client, Cluster,
 };
 use rand::rngs::OsRng;
-use smart_contract_solana::common::types::ToHash;
+use keyring_network::common::types::ToHash;
 use std::str::FromStr;
 
 #[test]
@@ -51,13 +51,13 @@ fn revoke_key() {
     let timestamp = get_timestamp(&rpc);
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RegisterKey {
+        .accounts(keyring_network::accounts::RegisterKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RegisterKey {
+        .args(keyring_network::instruction::RegisterKey {
             key: key.clone(),
             valid_from: timestamp - 1,
             valid_to: timestamp + 20,
@@ -67,13 +67,13 @@ fn revoke_key() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RevokeKey {
+        .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: dummy_payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RevokeKey { key: key.clone() })
+        .args(keyring_network::instruction::RevokeKey { key: key.clone() })
         .payer(&dummy_payer)
         .send()
         .expect_err("DummyPayer must not be allowed to revoke new key");
@@ -91,25 +91,25 @@ fn revoke_key() {
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RevokeKey {
+        .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: invalid_key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RevokeKey { key: invalid_key })
+        .args(keyring_network::instruction::RevokeKey { key: invalid_key })
         .send()
         .expect_err("Invalid key cannot be revoked");
 
     program
         .request()
-        .accounts(smart_contract_solana::accounts::RevokeKey {
+        .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
-        .args(smart_contract_solana::instruction::RevokeKey { key: key.clone() })
+        .args(keyring_network::instruction::RevokeKey { key: key.clone() })
         .send()
         .expect("Admin must be allowed to revoke key");
 }
