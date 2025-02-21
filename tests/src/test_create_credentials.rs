@@ -17,7 +17,7 @@ use std::str::FromStr;
 
 #[test]
 fn create_credentials() {
-    let program_id = "9tDMCGD9wDGE9ZEqGRteg9sR9kVEm7wxqdHZnHDdC3qw";
+    let program_id = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();

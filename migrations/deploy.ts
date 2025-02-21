@@ -19,7 +19,9 @@ module.exports = async function (provider) {
     // Configure client to use the provider.
     anchor.setProvider(provider);
     console.log("Provider configured");
-    
+
+    // Change directory to parent one in order to access program
+    process.chdir("..");
     const program = workspace.KeyringNetwork as Program<KeyringNetwork>;
     console.log("Program ID:", program.programId.toString());
     console.log("Program loaded");
@@ -34,13 +36,15 @@ module.exports = async function (provider) {
         console.log("Sending initialize transaction...");
         const txHash = await program.methods
         .initialize()
-        .accounts({})
+        .accounts({
+            programState: programStatePubkey,
+        })
         .rpc({ commitment: "finalized" });
         console.log("Initialize tx sent. Hash: ", txHash);
         
         console.log("Fetching program state...");
         const programStateAccount = await program.account.programState.fetch(programStatePubkey);
-        console.log("Program state is: ", programStateAccount);
+        console.log("Program state at", programStatePubkey.toString(), "is: ", programStateAccount);
         console.log("Admin is:", programStateAccount.admin.toString());
     } catch (e) {
         console.error("Error details:", e);
