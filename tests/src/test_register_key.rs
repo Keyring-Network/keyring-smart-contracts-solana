@@ -9,8 +9,8 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use rand::rngs::OsRng;
 use keyring_network::common::types::ToHash;
+use rand::rngs::OsRng;
 use std::str::FromStr;
 
 #[test]

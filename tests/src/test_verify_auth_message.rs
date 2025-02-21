@@ -1,10 +1,8 @@
 use crate::common::convert_secp_pubkey_to_address;
 use anchor_client::solana_sdk::secp256k1_recover::secp256k1_recover;
-use serde::{Deserialize, Serialize};
 use keyring_network::common::error::KeyringError;
-use keyring_network::common::verify_auth_message::{
-    create_signature_payload, split_signature,
-};
+use keyring_network::common::verify_auth_message::{create_signature_payload, split_signature};
+use serde::{Deserialize, Serialize};
 use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]

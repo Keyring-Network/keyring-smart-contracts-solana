@@ -18,9 +18,10 @@ use init::*;
 use register_key::*;
 use revoke_key::*;
 use set_admin::*;
-use unblacklist_entity::*;
 use solana_security_txt::security_txt;
+use unblacklist_entity::*;
 
+#[cfg(not(feature = "no-entrypoint"))]
 security_txt! {
     name: "Keyring Network",
     project_url: "https://Keyring.Network",

@@ -9,10 +9,10 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use libsecp256k1::{sign, Message};
-use rand::rngs::OsRng;
 use keyring_network::common::types::{EntityData, ToHash, CURRENT_VERSION};
 use keyring_network::common::verify_auth_message::create_signature_payload;
+use libsecp256k1::{sign, Message};
+use rand::rngs::OsRng;
 use std::str::FromStr;
 
 #[test]
