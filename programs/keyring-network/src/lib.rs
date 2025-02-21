@@ -18,6 +18,7 @@ use init::*;
 use register_key::*;
 use revoke_key::*;
 use set_admin::*;
+#[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 use unblacklist_entity::*;
 
