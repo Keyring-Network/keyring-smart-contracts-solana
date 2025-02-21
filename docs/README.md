@@ -5,4 +5,4 @@ This file is managed by the platform team. Any changes to this file will get aut
 # Home
 
 ## Source
-[Click here to be taken to where this documentation is synced from.](https://github.com/Keyring-Network/smart-contracts-solana/tree/master//docs)
+[Click here to be taken to where this documentation is synced from.](https://github.com/Keyring-Network/keyring-smart-contracts-solana/tree/master//docs)
