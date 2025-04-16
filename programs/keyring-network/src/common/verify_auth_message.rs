@@ -106,7 +106,7 @@ pub fn convert_to_eth_signed_message_hash(message_hash: Hash) -> Hash {
 //    uint160(cost),
 //    backdoor
 // );
-// See full code here: https://github.com/Keyring-Network/smart-contracts/blob/master/src/lib/RsaMessagePacking.sol#L18
+// See full code here: https://github.com/Keyring-Network/keyring-smart-contracts/blob/master/src/lib/RsaMessagePacking.sol#L18
 pub fn pack_auth_message(
     trading_address: Vec<u8>,
     policy_id: u64,
