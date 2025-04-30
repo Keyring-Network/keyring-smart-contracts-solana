@@ -1,4 +1,5 @@
 use crate::common::error::KeyringError;
+use crate::common::types::ChainId;
 use anchor_lang::solana_program::keccak;
 use anchor_lang::solana_program::keccak::Hash;
 use anchor_lang::solana_program::secp256k1_recover::{
@@ -43,7 +44,7 @@ pub fn verify_auth_message(
     policy_id: u64,
     trading_address: Vec<u8>,
     signature_data: Vec<u8>,
-    valid_from: u64,
+    chain_id: ChainId,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
@@ -53,7 +54,7 @@ pub fn verify_auth_message(
     let message_hash = create_signature_payload(
         trading_address,
         policy_id,
-        valid_from,
+        chain_id,
         valid_until,
         cost,
         backdoor,
@@ -68,7 +69,7 @@ pub fn verify_auth_message(
 pub fn create_signature_payload(
     trading_address: Vec<u8>,
     policy_id: u64,
-    valid_from: u64,
+    chain_id: ChainId,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
@@ -76,7 +77,7 @@ pub fn create_signature_payload(
     let packed_message = pack_auth_message(
         trading_address,
         policy_id,
-        valid_from,
+        chain_id,
         valid_until,
         cost,
         backdoor,
@@ -110,7 +111,7 @@ pub fn convert_to_eth_signed_message_hash(message_hash: Hash) -> Hash {
 pub fn pack_auth_message(
     trading_address: Vec<u8>,
     policy_id: u64,
-    valid_from: u64,
+    chain_id: ChainId,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
@@ -126,11 +127,6 @@ pub fn pack_auth_message(
     let encoded_policy_id =
         policy_id_in_bytes[policy_id_in_bytes.len() - 3..policy_id_in_bytes.len()].to_vec();
 
-    if valid_from > u32::MAX as u64 {
-        return Err(error!(KeyringError::ErrAuthMessageParameterOutOfRange));
-    }
-    let encoded_valid_from = (valid_from as u32).to_be_bytes().to_vec();
-
     if valid_until > u32::MAX as u64 {
         return Err(error!(KeyringError::ErrAuthMessageParameterOutOfRange));
     }
@@ -140,7 +136,7 @@ pub fn pack_auth_message(
     packed.extend_from_slice(&trading_address.as_slice());
     packed.push(reserved_byte);
     packed.extend_from_slice(&encoded_policy_id.as_slice());
-    packed.extend_from_slice(&encoded_valid_from.as_slice());
+    packed.extend_from_slice(&chain_id.0);
     packed.extend_from_slice(&encoded_valid_until.as_slice());
     packed.extend_from_slice(vec![0u8; 4].as_slice());
     packed.extend_from_slice(&encoded_cost.as_slice());

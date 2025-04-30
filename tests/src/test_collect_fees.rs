@@ -1,4 +1,6 @@
-use crate::common::{convert_pubkey_to_address, get_timestamp, init_program};
+use crate::common::{
+    convert_pubkey_to_address, generate_random_chain_id, get_timestamp, init_program,
+};
 use anchor_client::anchor_lang::prelude::System;
 use anchor_client::anchor_lang::Id;
 use anchor_client::solana_client::rpc_client::RpcClient;
@@ -9,7 +11,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::ToHash;
+use keyring_network::common::types::{ChainId, ToHash};
 use keyring_network::common::verify_auth_message::create_signature_payload;
 use libsecp256k1::{sign, Message};
 use rand::rngs::OsRng;
@@ -35,7 +37,9 @@ fn collect_fees() {
     rpc.request_airdrop(&dummy_payer.pubkey(), 10 * LAMPORTS_PER_SOL)
         .unwrap();
 
-    let (program_state_pubkey, _) = init_program(&program, &payer);
+    let mut rng = OsRng::default();
+    let chain_id = generate_random_chain_id(&mut rng);
+    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id.clone());
 
     let mut os_rng = OsRng::default();
     let secret_key = libsecp256k1::SecretKey::random(&mut os_rng);
@@ -70,7 +74,6 @@ fn collect_fees() {
     let timestamp = get_timestamp(&rpc);
     let policy_id: u64 = 1;
     let trading_address = Pubkey::new_unique();
-    let valid_from = timestamp - 1;
     let valid_until = timestamp + 10000;
     let cost = 6 * LAMPORTS_PER_SOL;
     let backdoor = vec![3; 24];
@@ -86,7 +89,7 @@ fn collect_fees() {
     let packed_message = create_signature_payload(
         convert_pubkey_to_address(&trading_address),
         policy_id,
-        valid_from,
+        ChainId::new(chain_id.clone()).unwrap(),
         valid_until,
         cost,
         backdoor.clone(),
@@ -112,7 +115,6 @@ fn collect_fees() {
             policy_id,
             trading_address,
             signature: serialized_signature.clone(),
-            valid_from,
             valid_until,
             cost,
             backdoor: backdoor.clone(),
