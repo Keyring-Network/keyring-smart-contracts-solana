@@ -1,4 +1,4 @@
-use crate::common::init_program;
+use crate::common::{generate_random_chain_id, init_program};
 use anchor_client::anchor_lang::prelude::System;
 use anchor_client::anchor_lang::Id;
 use anchor_client::solana_client::rpc_client::RpcClient;
@@ -10,6 +10,7 @@ use anchor_client::{
     Client, Cluster,
 };
 use keyring_network::common::types::{EntityData, CURRENT_VERSION};
+use rand::rngs::OsRng;
 use std::str::FromStr;
 
 #[test]
@@ -32,7 +33,9 @@ fn test_unblacklist_entity() {
     rpc.request_airdrop(&dummy_payer.pubkey(), 10 * LAMPORTS_PER_SOL)
         .unwrap();
 
-    let (program_state_pubkey, _) = init_program(&program, &payer);
+    let mut rng = OsRng::default();
+    let chain_id = generate_random_chain_id(&mut rng);
+    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id);
 
     let policy_id: u64 = 1;
     let trading_address = Pubkey::new_unique();

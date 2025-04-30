@@ -1,4 +1,4 @@
-use crate::common::init_program;
+use crate::common::{generate_random_chain_id, init_program};
 use anchor_client::solana_client::rpc_client::RpcClient;
 use anchor_client::solana_sdk::native_token::LAMPORTS_PER_SOL;
 use anchor_client::solana_sdk::signature::Keypair;
@@ -8,6 +8,7 @@ use anchor_client::{
     Client, Cluster,
 };
 use keyring_network::common::types::ProgramState;
+use rand::rngs::OsRng;
 use std::str::FromStr;
 
 #[test]
@@ -30,7 +31,9 @@ fn test_set_admin() {
     rpc.request_airdrop(&new_admin.pubkey(), 10 * LAMPORTS_PER_SOL)
         .unwrap();
 
-    let (program_state_pubkey, _) = init_program(&program, &payer);
+    let mut rng = OsRng::default();
+    let chain_id = generate_random_chain_id(&mut rng);
+    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id);
 
     // Non admin should not be able to call set_admin
     program

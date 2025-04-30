@@ -47,7 +47,6 @@ pub fn do_create_credential(
     policy_id: u64,
     trading_address: Pubkey,
     signature: Vec<u8>,
-    valid_from: u64,
     valid_until: u64,
     cost: u64,
     backdoor: Vec<u8>,
@@ -55,6 +54,8 @@ pub fn do_create_credential(
     if cost == 0 {
         return Err(error!(KeyringError::ErrCostParameterZero));
     }
+
+    let chain_id = ctx.accounts.program_state.chain_id.clone();
 
     // Transfer the cost to our PDA
     let cpi_context = CpiContext::new(
@@ -78,7 +79,7 @@ pub fn do_create_credential(
         policy_id,
         truncated_trading_address,
         signature,
-        valid_from,
+        chain_id,
         valid_until,
         cost,
         backdoor,

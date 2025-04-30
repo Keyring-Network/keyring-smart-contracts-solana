@@ -1,10 +1,12 @@
-use crate::common::types::{ProgramState, CURRENT_VERSION};
+use crate::common::error::KeyringError;
+use crate::common::types::{ChainId, ProgramState, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
 #[event]
 pub struct Initialized {
     admin: Pubkey,
+    chain_id: ChainId,
 }
 
 #[derive(Accounts)]
@@ -22,14 +24,18 @@ pub struct Initialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn do_initialize(ctx: Context<Initialize>) -> Result<()> {
+pub fn do_initialize(ctx: Context<Initialize>, chain_id: Vec<u8>) -> Result<()> {
+    let chain_id = ChainId::new(chain_id).map_err(|_| KeyringError::ErrInvalidChainId)?;
+
     *ctx.accounts.program_state = ProgramState {
         version: CURRENT_VERSION,
         admin: ctx.accounts.signer.key.clone(),
+        chain_id: chain_id.clone(),
     };
 
     emit!(Initialized {
-        admin: ctx.accounts.signer.key.clone()
+        admin: ctx.accounts.signer.key.clone(),
+        chain_id: chain_id.clone(),
     });
     Ok(())
 }

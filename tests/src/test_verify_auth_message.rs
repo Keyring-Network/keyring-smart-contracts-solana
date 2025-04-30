@@ -1,6 +1,7 @@
 use crate::common::convert_secp_pubkey_to_address;
 use anchor_client::solana_sdk::secp256k1_recover::secp256k1_recover;
 use keyring_network::common::error::KeyringError;
+use keyring_network::common::types::ChainId;
 use keyring_network::common::verify_auth_message::{create_signature_payload, split_signature};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -11,7 +12,8 @@ pub struct Secp256k1Vector {
     #[serde(with = "hex::serde")]
     pub trading_address: Vec<u8>,
     pub policy_id: u64,
-    pub create_before: u64,
+    #[serde(with = "hex::serde")]
+    pub chain_id: Vec<u8>,
     pub valid_until: u64,
     pub cost: u64,
     #[serde(with = "hex::serde")]
@@ -39,7 +41,7 @@ pub fn test_verify_auth_message() {
         create_signature_payload(
             vectors.vectors[0].trading_address.clone(),
             2u64.pow(24),
-            vectors.vectors[0].create_before,
+            ChainId::new(vectors.vectors[0].chain_id.clone()).unwrap(),
             vectors.vectors[0].valid_until,
             vectors.vectors[0].cost,
             vectors.vectors[0].backdoor.clone(),
@@ -52,20 +54,7 @@ pub fn test_verify_auth_message() {
         create_signature_payload(
             vectors.vectors[0].trading_address.clone(),
             vectors.vectors[0].policy_id,
-            u32::MAX as u64 + 1,
-            vectors.vectors[0].valid_until,
-            vectors.vectors[0].cost,
-            vectors.vectors[0].backdoor.clone(),
-        )
-        .unwrap_err(),
-        KeyringError::ErrAuthMessageParameterOutOfRange.into()
-    );
-
-    assert_eq!(
-        create_signature_payload(
-            vectors.vectors[0].trading_address.clone(),
-            vectors.vectors[0].policy_id,
-            vectors.vectors[0].create_before,
+            ChainId::new(vectors.vectors[0].chain_id.clone()).unwrap(),
             u32::MAX as u64 + 1,
             vectors.vectors[0].cost,
             vectors.vectors[0].backdoor.clone(),
@@ -78,7 +67,7 @@ pub fn test_verify_auth_message() {
         let message_hash = create_signature_payload(
             vector.trading_address,
             vector.policy_id,
-            vector.create_before,
+            ChainId::new(vector.chain_id.clone()).unwrap(),
             vector.valid_until,
             vector.cost,
             vector.backdoor,
