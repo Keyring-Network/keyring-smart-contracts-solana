@@ -26,4 +26,6 @@ pub enum KeyringError {
     ErrInCheckingCredentials,
     #[msg("Error auth message parameter out of range")]
     ErrAuthMessageParameterOutOfRange,
+    #[msg("Invalid chain id")]
+    ErrInvalidChainId,
 }

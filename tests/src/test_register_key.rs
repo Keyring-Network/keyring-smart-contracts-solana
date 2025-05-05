@@ -1,4 +1,4 @@
-use crate::common::{get_timestamp, init_program};
+use crate::common::{generate_random_chain_id, get_timestamp, init_program};
 use anchor_client::anchor_lang::prelude::System;
 use anchor_client::anchor_lang::Id;
 use anchor_client::solana_client::rpc_client::RpcClient;
@@ -33,7 +33,9 @@ fn register_key() {
     rpc.request_airdrop(&dummy_payer.pubkey(), 10 * LAMPORTS_PER_SOL)
         .unwrap();
 
-    let (program_state_pubkey, _) = init_program(&program, &payer);
+    let mut rng = OsRng::default();
+    let chain_id = generate_random_chain_id(&mut rng);
+    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id);
 
     let mut os_rng = OsRng::default();
     let secret_key = libsecp256k1::SecretKey::random(&mut os_rng);

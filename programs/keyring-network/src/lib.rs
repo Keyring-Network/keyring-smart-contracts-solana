@@ -39,8 +39,8 @@ declare_id!("GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch");
 pub mod keyring_network {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        do_initialize(ctx)
+    pub fn initialize(ctx: Context<Initialize>, chain_id: Vec<u8>) -> Result<()> {
+        do_initialize(ctx, chain_id)
     }
 
     pub fn set_admin(ctx: Context<SetAdmin>, new_admin: Pubkey) -> Result<()> {
@@ -86,7 +86,6 @@ pub mod keyring_network {
         policy_id: u64,
         trading_address: Pubkey,
         signature: Vec<u8>,
-        valid_from: u64,
         valid_until: u64,
         cost: u64,
         backdoor: Vec<u8>,
@@ -97,7 +96,6 @@ pub mod keyring_network {
             policy_id,
             trading_address,
             signature,
-            valid_from,
             valid_until,
             cost,
             backdoor,
