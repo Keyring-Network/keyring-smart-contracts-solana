@@ -1,11 +1,13 @@
 {
-  "license": "ISC",  
+  "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "initialize": "npx tsx scripts/initialize.ts",
+    "setAdmin": "npx tsx scripts/setAdmin.ts"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.29.1"
+    "@coral-xyz/anchor": "^0.29.0"
   },
   "devDependencies": {
     "chai": "^4.3.4",
