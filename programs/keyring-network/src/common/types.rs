@@ -54,7 +54,7 @@ pub const CHAIN_ID_MAX_SIZE: usize = 41;
 /// Min size of chain id as per CAIP2 spec
 pub const CHAIN_ID_MIN_SIZE: usize = 5;
 
-#[derive(AnchorSerialize, AnchorDeserialize, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum ChainIdConversionError {
     InputExceedsMaxSize { expected: usize, actual: usize },
     InputLessThanMinSize { expected: usize, actual: usize },
