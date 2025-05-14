@@ -61,7 +61,9 @@ pub enum ChainIdConversionError {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
-pub struct ChainId(pub [u8; CHAIN_ID_MAX_SIZE]);
+pub struct ChainId {
+    pub chain_id: [u8; CHAIN_ID_MAX_SIZE],
+}
 
 impl ChainId {
     pub fn new(chain_id: Vec<u8>) -> std::result::Result<ChainId, ChainIdConversionError> {
@@ -84,7 +86,9 @@ impl ChainId {
             constructed_chain_id[i] = *elem;
         }
 
-        Ok(ChainId(constructed_chain_id))
+        Ok(ChainId {
+            chain_id: constructed_chain_id,
+        })
     }
 }
 

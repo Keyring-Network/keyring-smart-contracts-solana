@@ -136,7 +136,7 @@ pub fn pack_auth_message(
     packed.extend_from_slice(&trading_address.as_slice());
     packed.push(reserved_byte);
     packed.extend_from_slice(&encoded_policy_id.as_slice());
-    packed.extend_from_slice(&chain_id.0);
+    packed.extend_from_slice(&chain_id.chain_id);
     packed.extend_from_slice(&encoded_valid_until.as_slice());
     packed.extend_from_slice(vec![0u8; 4].as_slice());
     packed.extend_from_slice(&encoded_cost.as_slice());
