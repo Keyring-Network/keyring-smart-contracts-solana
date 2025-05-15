@@ -20,7 +20,7 @@ async function setAdmin() {
             programState: getProgramStatePda(config.program.programId),
             signer: config.provider.wallet.publicKey,
         })
-        .simulate();
+        .rpc();
 
     console.log("Successfully set new admin");
     console.log("Transaction signature: ", txSignature);

@@ -17,7 +17,7 @@ async function initialize() {
             signer: config.provider.wallet.publicKey,
             systemProgram: anchor.web3.SystemProgram.programId,
         })
-        .simulate();
+        .rpc();
 
     console.log("Successfully initialized program");
     console.log("Transaction signature: ", txSignature);
