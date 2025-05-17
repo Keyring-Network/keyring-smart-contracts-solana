@@ -3,6 +3,7 @@ import * as idl from "../../target/idl/keyring_network.json";
 import { KeyringNetwork } from "../../target/types/keyring_network";
 
 import { Config } from "./types";
+import { getKeyMappingPda, getProgramStatePda } from "./getPda";
 
 async function setup(): Promise<Config> {
     const stringKeypair = process.env.KEYPAIR || "";
