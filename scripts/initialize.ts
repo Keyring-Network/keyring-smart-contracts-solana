@@ -7,7 +7,8 @@ import { getProgramStatePda } from "./utils/getPda";
 async function initialize() {
     const config: Config = await setup();
     const solanaChainId = 1915121141;
-    const bufferSolanaChainId = new anchor.BN(solanaChainId).toBuffer("be");
+    const bufferSolanaChainId = Buffer.alloc(4);
+    bufferSolanaChainId.writeUInt32BE(solanaChainId, 0);
 
     console.log("Initializing program...");
 
