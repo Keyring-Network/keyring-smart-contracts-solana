@@ -6,12 +6,13 @@ import { getProgramStatePda } from "./utils/getPda";
 
 async function initialize() {
     const config: Config = await setup();
-    const solanaCaipId = "1915121141";
+    const solanaChainId = 1915121141;
+    const bufferSolanaChainId = new anchor.BN(solanaChainId).toBuffer("be");
 
     console.log("Initializing program...");
 
     const txSignature = await config.program.methods
-        .initialize(Buffer.from(solanaCaipId))
+        .initialize(bufferSolanaChainId)
         .accounts({
             programState: getProgramStatePda(config.program.programId),
             signer: config.provider.wallet.publicKey,

@@ -5,7 +5,7 @@ use anchor_lang::solana_program::keccak::Hash;
 use anchor_lang::solana_program::secp256k1_recover::{
     secp256k1_recover, Secp256k1Pubkey, SECP256K1_PUBLIC_KEY_LENGTH, SECP256K1_SIGNATURE_LENGTH,
 };
-use anchor_lang::{error, Result};
+use anchor_lang::{error, AnchorSerialize, Result};
 
 pub const ETH_SIGNED_MESSAGE_PREFIX: &[u8] = b"\x19Ethereum Signed Message:\n32";
 
@@ -133,10 +133,12 @@ pub fn pack_auth_message(
     let encoded_valid_until = (valid_until as u32).to_be_bytes().to_vec();
     let encoded_cost = (cost as u128).to_be_bytes().to_vec();
 
+    let chain_id_len = chain_id.chain_id.len();
+
     packed.extend_from_slice(&trading_address.as_slice());
     packed.push(reserved_byte);
     packed.extend_from_slice(&encoded_policy_id.as_slice());
-    packed.extend_from_slice(&chain_id.chain_id);
+    packed.extend_from_slice(&chain_id.chain_id[chain_id_len - 4..chain_id_len]);
     packed.extend_from_slice(&encoded_valid_until.as_slice());
     packed.extend_from_slice(vec![0u8; 4].as_slice());
     packed.extend_from_slice(&encoded_cost.as_slice());
