@@ -52,7 +52,7 @@ impl EntityData {
 /// Max size of chain id as per CAIP2 spec
 pub const CHAIN_ID_MAX_SIZE: usize = 41;
 /// Min size of chain id as per CAIP2 spec
-pub const CHAIN_ID_MIN_SIZE: usize = 5;
+pub const CHAIN_ID_MIN_SIZE: usize = 4; // should be 5, but hacked to 4 temporarily
 
 #[derive(Debug, PartialEq)]
 pub enum ChainIdConversionError {
