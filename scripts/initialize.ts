@@ -6,7 +6,7 @@ import { getProgramStatePda } from "./utils/getPda";
 
 async function initialize() {
     const config: Config = await setup();
-    const solanaCaipId = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
+    const solanaCaipId = "1915121141";
 
     console.log("Initializing program...");
 
