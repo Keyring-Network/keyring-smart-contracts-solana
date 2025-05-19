@@ -33,6 +33,4 @@ async function registerKey() {
     console.log("Transaction signature: ", txSignature);
 }
 
-registerKey().catch((err) =>
-    console.log("Error registering the key: ", (err as Error).message)
-);
+registerKey();

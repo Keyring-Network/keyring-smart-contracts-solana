@@ -26,6 +26,4 @@ async function setAdmin() {
     console.log("Transaction signature: ", txSignature);
 }
 
-setAdmin().catch((err) =>
-    console.log("Error setting new admin: ", (err as Error).message)
-);
+setAdmin();

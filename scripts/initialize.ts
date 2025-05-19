@@ -6,9 +6,9 @@ import { getProgramStatePda } from "./utils/getPda";
 
 async function initialize() {
     const config: Config = await setup();
+
     const solanaChainId = 1915121141;
-    const bufferSolanaChainId = Buffer.alloc(4);
-    bufferSolanaChainId.writeUInt32BE(solanaChainId, 0);
+    const bufferSolanaChainId = new anchor.BN(solanaChainId).toBuffer("be", 4);
 
     console.log("Initializing program...");
 
@@ -25,6 +25,4 @@ async function initialize() {
     console.log("Transaction signature: ", txSignature);
 }
 
-initialize().catch((err) =>
-    console.log("Error initializing the program: ", (err as Error).message)
-);
+initialize();
