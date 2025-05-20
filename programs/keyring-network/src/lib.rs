@@ -33,7 +33,7 @@ security_txt! {
     auditors: "None"
 }
 
-declare_id!("9jpm6UY7xB9j8hUJ7LVW9vHtc5sT9QHyvdcbkpTyroXB");
+declare_id!("EriBS9oKzjR6TQP8WnL8prgyzUXDoBKMw8Tn4bD1ZZ1S");
 
 #[program]
 pub mod keyring_network {
