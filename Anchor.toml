@@ -2,25 +2,24 @@
 anchor_version = "0.29.0"
 
 [features]
-resolution = true
 seeds = false
 skip-lint = false
 
 [programs.devnet]
-keyring_network = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch"
+keyring_network = "3MxhjuscSykCxXaozceBAUySdp6qHieB7sTXdarYAXTp"
 
 [programs.localnet]
-keyring_network = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch"
+keyring_network = "3MxhjuscSykCxXaozceBAUySdp6qHieB7sTXdarYAXTp"
 
 [programs.mainnet]
-keyring_network = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch"
+keyring_network = "3MxhjuscSykCxXaozceBAUySdp6qHieB7sTXdarYAXTp"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "Localnet"
-wallet = "~/.config/solana/id.json"
+wallet = "/home/sahil/.config/solana/id.json"
 
 [scripts]
 test = "cargo test"

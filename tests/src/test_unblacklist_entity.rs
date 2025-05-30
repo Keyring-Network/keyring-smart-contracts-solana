@@ -10,12 +10,11 @@ use anchor_client::{
     Client, Cluster,
 };
 use keyring_network::common::types::{EntityData, CURRENT_VERSION};
+use keyring_network::ID as program_id;
 use rand::rngs::OsRng;
-use std::str::FromStr;
 
 #[test]
 fn test_unblacklist_entity() {
-    let program_id = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();
@@ -24,7 +23,6 @@ fn test_unblacklist_entity() {
         .unwrap();
 
     let client = Client::new_with_options(Cluster::Localnet, &payer, CommitmentConfig::confirmed());
-    let program_id = Pubkey::from_str(program_id).unwrap();
     let program = client.program(program_id).unwrap();
 
     // Let's fund new admin

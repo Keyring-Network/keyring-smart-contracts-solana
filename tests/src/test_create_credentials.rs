@@ -13,13 +13,12 @@ use anchor_client::{
 };
 use keyring_network::common::types::{ChainId, EntityData, ToHash, CURRENT_VERSION};
 use keyring_network::common::verify_auth_message::create_signature_payload;
+use keyring_network::ID as program_id;
 use libsecp256k1::{sign, Message};
 use rand::rngs::OsRng;
-use std::str::FromStr;
 
 #[test]
 fn create_credentials() {
-    let program_id = "GJ5ZVSwDmLDwokctrkdrxfYTRndDtPhso8p7imCGVvch";
     let anchor_rpc_client = RpcClient::new(Cluster::Localnet.url());
 
     let payer = Keypair::new();
@@ -28,7 +27,6 @@ fn create_credentials() {
         .unwrap();
 
     let client = Client::new_with_options(Cluster::Localnet, &payer, CommitmentConfig::confirmed());
-    let program_id = Pubkey::from_str(program_id).unwrap();
     let program = client.program(program_id).unwrap();
 
     // Let's fund dummy payer
