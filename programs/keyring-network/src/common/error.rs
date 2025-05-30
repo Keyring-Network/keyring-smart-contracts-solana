@@ -28,4 +28,6 @@ pub enum KeyringError {
     ErrAuthMessageParameterOutOfRange,
     #[msg("Invalid chain id")]
     ErrInvalidChainId,
+    #[msg("Number of keys breached max active key limit")]
+    ErrBreachedMaxActiveKeyLimit,
 }

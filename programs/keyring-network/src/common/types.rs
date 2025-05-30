@@ -1,6 +1,9 @@
 use anchor_lang::account;
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::keccak::{hash, Hash};
+use anchor_lang::solana_program::{
+    keccak::{hash, Hash},
+    secp256k1_recover::SECP256K1_PUBLIC_KEY_LENGTH,
+};
 
 pub const CURRENT_VERSION: u8 = 1;
 
@@ -25,6 +28,18 @@ pub struct KeyEntry {
 
 impl KeyEntry {
     pub const MAX_SIZE: usize = 1 + 8 + 8 + 1;
+}
+
+pub const MAX_ACTIVE_KEYS: u8 = 10;
+
+#[account]
+#[derive(Debug, PartialEq)]
+pub struct KeyRegistry {
+    pub active_keys: Vec<Vec<u8>>,
+}
+
+impl KeyRegistry {
+    pub const MAX_SIZE: usize = SECP256K1_PUBLIC_KEY_LENGTH * MAX_ACTIVE_KEYS as usize;
 }
 
 pub trait ToHash {

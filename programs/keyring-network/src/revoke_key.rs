@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{KeyEntry, ProgramState, ToHash};
+use crate::common::types::{KeyEntry, KeyRegistry, ProgramState, ToHash};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -16,6 +16,12 @@ pub struct RevokeKey<'info> {
         bump
     )]
     pub program_state: Account<'info, ProgramState>,
+    #[account(
+        mut,
+        seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        bump,
+    )]
+    pub key_registry: Account<'info, KeyRegistry>,
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
@@ -35,6 +41,11 @@ pub fn do_revoke_key(ctx: Context<RevokeKey>, key: Vec<u8>) -> Result<()> {
     }
 
     ctx.accounts.key_mapping.is_valid = false;
+
+    let active_keys = &mut ctx.accounts.key_registry.active_keys;
+    if let Some(index) = active_keys.iter().position(|x| x.eq(&key)) {
+        active_keys.swap_remove(index);
+    }
 
     emit!(KeyRevoked { key });
 

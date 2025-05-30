@@ -50,12 +50,17 @@ fn create_credentials() {
         key_hash.as_ref(),
     ];
     let (key_mapping_pubkey, _) = Pubkey::find_program_address(&key_mapping_seeds, &program.id());
+    let (key_registry, _) = Pubkey::find_program_address(
+        &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        &program.id(),
+    );
 
     let timestamp = get_timestamp(&rpc);
     program
         .request()
         .accounts(keyring_network::accounts::RegisterKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
@@ -497,6 +502,7 @@ fn create_credentials() {
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
