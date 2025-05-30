@@ -1,5 +1,7 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{KeyEntry, ProgramState, ToHash, CURRENT_VERSION};
+use crate::common::types::{
+    KeyEntry, KeyRegistry, ProgramState, ToHash, CURRENT_VERSION, MAX_ACTIVE_KEYS,
+};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::secp256k1_recover::SECP256K1_PUBLIC_KEY_LENGTH;
 use anchor_lang::Accounts;
@@ -19,6 +21,12 @@ pub struct RegisterKey<'info> {
         bump
     )]
     pub program_state: Account<'info, ProgramState>,
+    #[account(
+        mut,
+        seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        bump,
+    )]
+    pub key_registry: Account<'info, KeyRegistry>,
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
@@ -69,6 +77,11 @@ pub fn do_register_key(
         valid_from,
         valid_to,
     };
+
+    if ctx.accounts.key_registry.active_keys.len() + 1 > MAX_ACTIVE_KEYS as usize {
+        return Err(error!(KeyringError::ErrBreachedMaxActiveKeyLimit));
+    }
+    ctx.accounts.key_registry.active_keys.push(key.clone());
 
     emit!(KeyRegistered {
         key,

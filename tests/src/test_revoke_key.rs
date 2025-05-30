@@ -10,7 +10,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::ToHash;
+use keyring_network::common::types::{KeyRegistry, ToHash};
 use keyring_network::ID as program_id;
 use rand::rngs::OsRng;
 
@@ -47,12 +47,17 @@ fn revoke_key() {
         key_hash.as_ref(),
     ];
     let (key_mapping_pubkey, _) = Pubkey::find_program_address(&key_mapping_seeds, &program.id());
+    let (key_registry, _) = Pubkey::find_program_address(
+        &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        &program.id(),
+    );
 
     let timestamp = get_timestamp(&rpc);
     program
         .request()
         .accounts(keyring_network::accounts::RegisterKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
@@ -65,10 +70,18 @@ fn revoke_key() {
         .send()
         .expect("Valid key registration must be successful");
 
+    let key_registry_account: KeyRegistry = program.account(key_registry).unwrap();
+    assert_eq!(
+        key_registry_account.active_keys.first().unwrap().clone(),
+        key.clone()
+    );
+    assert_eq!(key_registry_account.active_keys.len(), 1);
+
     program
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: dummy_payer.pubkey(),
             system_program: System::id(),
@@ -93,6 +106,7 @@ fn revoke_key() {
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: invalid_key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
@@ -105,6 +119,7 @@ fn revoke_key() {
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
             program_state: program_state_pubkey.clone(),
+            key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
@@ -112,4 +127,7 @@ fn revoke_key() {
         .args(keyring_network::instruction::RevokeKey { key: key.clone() })
         .send()
         .expect("Admin must be allowed to revoke key");
+
+    let key_registry_account: KeyRegistry = program.account(key_registry).unwrap();
+    assert_eq!(key_registry_account.active_keys.len(), 0);
 }
