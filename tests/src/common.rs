@@ -23,6 +23,10 @@ pub fn init_program(
         &[b"keyring_program".as_ref(), b"global_state".as_ref()],
         &program.id(),
     );
+    let (key_registry, _) = Pubkey::find_program_address(
+        &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        &program.id(),
+    );
 
     // Initialization with invalid chain id should not work.
     let invalid_chain_id = vec![1; CHAIN_ID_MAX_SIZE + 1];
@@ -30,6 +34,7 @@ pub fn init_program(
         .request()
         .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
+            key_registry: key_registry.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
@@ -44,6 +49,7 @@ pub fn init_program(
         .request()
         .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
+            key_registry: key_registry.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
@@ -58,6 +64,7 @@ pub fn init_program(
         .request()
         .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
+            key_registry: key_registry.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })
@@ -72,6 +79,7 @@ pub fn init_program(
         .request()
         .accounts(keyring_network::accounts::Initialize {
             program_state: program_state.clone(),
+            key_registry: key_registry.clone(),
             signer: payer.pubkey(),
             system_program: System::id(),
         })

@@ -2,7 +2,11 @@ import * as anchor from "@coral-xyz/anchor";
 
 import { setup } from "./utils/setup";
 import { Config } from "./utils/types";
-import { getProgramStatePda, getKeyMappingPda } from "./utils/getPda";
+import {
+    getProgramStatePda,
+    getKeyMappingPda,
+    getKeyRegistryPda,
+} from "./utils/getPda";
 
 async function registerKey() {
     const config: Config = await setup();
@@ -23,6 +27,7 @@ async function registerKey() {
         .registerKey(key, new anchor.BN(validFrom), new anchor.BN(validUntil))
         .accounts({
             programState: getProgramStatePda(config.program.programId),
+            keyRegistry: getKeyRegistryPda(config.program.programId),
             signer: config.provider.wallet.publicKey,
             keyMapping: getKeyMappingPda(key, config.program.programId),
             systemProgram: anchor.web3.SystemProgram.programId,

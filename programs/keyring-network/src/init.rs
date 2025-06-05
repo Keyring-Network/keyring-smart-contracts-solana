@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{ChainId, ProgramState, CURRENT_VERSION};
+use crate::common::types::{ChainId, KeyRegistry, ProgramState, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -19,6 +19,14 @@ pub struct Initialize<'info> {
         space = 8 + ProgramState::MAX_SIZE
     )]
     pub program_state: Account<'info, ProgramState>,
+    #[account(
+        init,
+        payer = signer,
+        seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],
+        bump,
+        space = 8 + KeyRegistry::MAX_SIZE
+    )]
+    pub key_registry: Account<'info, KeyRegistry>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
