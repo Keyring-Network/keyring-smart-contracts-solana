@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 
 import { setup } from "./utils/setup";
 import { Config } from "./utils/types";
-import { getProgramStatePda } from "./utils/getPda";
+import { getKeyRegistryPda, getProgramStatePda } from "./utils/getPda";
 
 async function initialize() {
     const config: Config = await setup();
@@ -16,6 +16,7 @@ async function initialize() {
         .initialize(bufferSolanaChainId)
         .accounts({
             programState: getProgramStatePda(config.program.programId),
+            keyRegistry: getKeyRegistryPda(config.program.programId),
             signer: config.provider.wallet.publicKey,
             systemProgram: anchor.web3.SystemProgram.programId,
         })

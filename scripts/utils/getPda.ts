@@ -9,6 +9,12 @@ const getProgramStatePda = (programId: anchor.web3.PublicKey) =>
         programId
     )[0];
 
+const getKeyRegistryPda = (programId: anchor.web3.PublicKey) =>
+    anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("keyring_program"), Buffer.from("active_keys")],
+        programId
+    )[0];
+
 const getKeyMappingPda = (
     key: Buffer<ArrayBuffer>,
     programId: anchor.web3.PublicKey
@@ -22,4 +28,4 @@ const getKeyMappingPda = (
         programId
     )[0];
 
-export { getProgramStatePda, getKeyMappingPda };
+export { getProgramStatePda, getKeyRegistryPda, getKeyMappingPda };
