@@ -2,8 +2,8 @@ use anchor_lang::error_code;
 
 #[error_code]
 pub enum KeyringError {
-    #[msg("The caller is not administrator")]
-    ErrCallerNotAdmin,
+    #[msg("The caller does not have the required role")]
+    ErrCallerDoesNotHaveRole,
     #[msg("Invalid parameters passed in key registration")]
     ErrInvalidKeyRegistrationParams,
     #[msg("Invalid credentials passed")]

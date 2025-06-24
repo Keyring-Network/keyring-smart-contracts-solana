@@ -4,9 +4,9 @@ mod collect_fees;
 pub mod common;
 mod create_credential;
 mod init;
+mod manage_role;
 mod register_key;
 mod revoke_key;
-mod set_admin;
 mod unblacklist_entity;
 
 use anchor_lang::prelude::*;
@@ -15,9 +15,9 @@ use check_credentials::*;
 use collect_fees::*;
 use create_credential::*;
 use init::*;
+use manage_role::*;
 use register_key::*;
 use revoke_key::*;
-use set_admin::*;
 #[cfg(not(feature = "no-entrypoint"))]
 use solana_security_txt::security_txt;
 use unblacklist_entity::*;
@@ -43,8 +43,13 @@ pub mod keyring_network {
         do_initialize(ctx, chain_id)
     }
 
-    pub fn set_admin(ctx: Context<SetAdmin>, new_admin: Pubkey) -> Result<()> {
-        do_set_admin(ctx, new_admin)
+    pub fn manage_roles(
+        ctx: Context<ManageRole>,
+        role: [u8; 32],
+        user: Pubkey,
+        has_role: bool,
+    ) -> Result<()> {
+        do_manage_role(ctx, role, user, has_role)
     }
 
     pub fn register_key(
