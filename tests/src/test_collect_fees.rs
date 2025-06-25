@@ -11,7 +11,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::{ChainId, ToHash};
+use keyring_network::common::types::{ChainId, ToHash, KEY_MANAGER_ROLE, OPERATOR_ROLE};
 use keyring_network::common::verify_auth_message::create_signature_payload;
 use keyring_network::ID as program_id;
 use libsecp256k1::{sign, Message};
@@ -37,7 +37,8 @@ fn collect_fees() {
 
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
-    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id.clone());
+    let (program_state_pubkey, _, default_admin_role_pubkey) =
+        init_program(&program, &payer, chain_id.clone());
 
     let mut os_rng = OsRng::default();
     let secret_key = libsecp256k1::SecretKey::random(&mut os_rng);
@@ -54,15 +55,58 @@ fn collect_fees() {
         &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
         &program.id(),
     );
+    let (key_manager_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[
+            KEY_MANAGER_ROLE.as_ref(),
+            payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+    let (operator_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[OPERATOR_ROLE.as_ref(), payer.pubkey().to_bytes().as_ref()],
+        &program.id(),
+    );
+
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: key_manager_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: KEY_MANAGER_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant key manager role");
+
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: operator_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: OPERATOR_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant operator role");
 
     let timestamp = get_timestamp(&rpc);
     program
         .request()
         .accounts(keyring_network::accounts::RegisterKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RegisterKey {
@@ -139,12 +183,13 @@ fn collect_fees() {
         .accounts(keyring_network::accounts::CollectFees {
             program_state: program_state_pubkey.clone(),
             signer: dummy_payer.pubkey(),
+            operator_role: operator_role_account_for_admin,
             receiver_account: fee_collector.pubkey(),
         })
         .args(keyring_network::instruction::CollectFees {})
         .payer(&dummy_payer)
         .send()
-        .expect_err("Non-admin must not be able to collect fees");
+        .expect_err("Non-operator must not be able to collect fees");
 
     // Valid fee collection should credit the fee collector
     program
@@ -152,11 +197,12 @@ fn collect_fees() {
         .accounts(keyring_network::accounts::CollectFees {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            operator_role: operator_role_account_for_admin,
             receiver_account: fee_collector.pubkey(),
         })
         .args(keyring_network::instruction::CollectFees {})
         .send()
-        .expect("Admin must be able to collect fees");
+        .expect("Operator must be able to collect fees");
 
     // We should have received the amount paid in the previous instruction
     assert_eq!(rpc.get_balance(&fee_collector.pubkey()).unwrap(), cost);
@@ -167,11 +213,12 @@ fn collect_fees() {
         .accounts(keyring_network::accounts::CollectFees {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            operator_role: operator_role_account_for_admin,
             receiver_account: fee_collector.pubkey(),
         })
         .args(keyring_network::instruction::CollectFees {})
         .send()
-        .expect("Admin must be able to collect fees even when it is 0.");
+        .expect("Operator must be able to collect fees even when it is 0.");
 
     // The balance should not change
     assert_eq!(rpc.get_balance(&fee_collector.pubkey()).unwrap(), cost);

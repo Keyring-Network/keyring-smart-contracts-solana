@@ -29,7 +29,6 @@ pub struct ManageRole<'info> {
     role: Account<'info, Role>,
     #[account(mut)]
     pub signer: Signer<'info>,
-
     pub system_program: Program<'info, System>,
 }
 

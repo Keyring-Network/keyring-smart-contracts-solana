@@ -10,7 +10,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::{KeyRegistry, ToHash};
+use keyring_network::common::types::{KeyRegistry, ToHash, KEY_MANAGER_ROLE};
 use keyring_network::ID as program_id;
 use rand::rngs::OsRng;
 
@@ -34,7 +34,7 @@ fn revoke_key() {
 
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
-    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id);
+    let (_, _, default_admin_role_pubkey) = init_program(&program, &payer, chain_id);
 
     let mut os_rng = OsRng::default();
     let secret_key = libsecp256k1::SecretKey::random(&mut os_rng);
@@ -51,15 +51,45 @@ fn revoke_key() {
         &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
         &program.id(),
     );
+    let (key_manager_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[
+            KEY_MANAGER_ROLE.as_ref(),
+            payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+    let (key_manager_role_account_for_dummy_payer, _) = Pubkey::find_program_address(
+        &[
+            KEY_MANAGER_ROLE.as_ref(),
+            dummy_payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: key_manager_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: KEY_MANAGER_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant key manager role");
 
     let timestamp = get_timestamp(&rpc);
     program
         .request()
         .accounts(keyring_network::accounts::RegisterKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RegisterKey {
@@ -80,10 +110,10 @@ fn revoke_key() {
     program
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: dummy_payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_dummy_payer,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RevokeKey { key: key.clone() })
@@ -105,10 +135,10 @@ fn revoke_key() {
     program
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: invalid_key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RevokeKey { key: invalid_key })
@@ -118,15 +148,15 @@ fn revoke_key() {
     program
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RevokeKey { key: key.clone() })
         .send()
-        .expect("Admin must be allowed to revoke key");
+        .expect("Key manager must be allowed to revoke key");
 
     let key_registry_account: KeyRegistry = program.account(key_registry).unwrap();
     assert_eq!(key_registry_account.active_keys.len(), 0);

@@ -1,7 +1,6 @@
 use crate::common::error::KeyringError;
 use crate::common::types::{
-    KeyEntry, KeyRegistry, ProgramState, Role, ToHash, CURRENT_VERSION, KEY_MANAGER_ROLE,
-    MAX_ACTIVE_KEYS,
+    KeyEntry, KeyRegistry, Role, ToHash, CURRENT_VERSION, KEY_MANAGER_ROLE, MAX_ACTIVE_KEYS,
 };
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::secp256k1_recover::SECP256K1_PUBLIC_KEY_LENGTH;
@@ -17,11 +16,6 @@ pub struct KeyRegistered {
 #[derive(Accounts)]
 #[instruction(key: Vec<u8>)]
 pub struct RegisterKey<'info> {
-    #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
     #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],

@@ -49,6 +49,7 @@ pub fn do_initialize(ctx: Context<Initialize>, chain_id: Vec<u8>) -> Result<()> 
         version: CURRENT_VERSION,
         chain_id: chain_id.clone(),
     };
+    ctx.accounts.default_admin_role.has_role = true;
 
     emit!(Initialized {
         admin: ctx.accounts.signer.key.clone(),

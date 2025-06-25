@@ -9,7 +9,7 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::{EntityData, CURRENT_VERSION};
+use keyring_network::common::types::{EntityData, BLACKLIST_MANAGER_ROLE, CURRENT_VERSION};
 use keyring_network::ID as program_id;
 use rand::rngs::OsRng;
 
@@ -33,7 +33,7 @@ fn test_blacklist_entity() {
 
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
-    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id);
+    let (_, _, default_admin_role_pubkey) = init_program(&program, &payer, chain_id);
 
     let policy_id: u64 = 1;
     let trading_address = Pubkey::new_unique();
@@ -45,13 +45,43 @@ fn test_blacklist_entity() {
     ];
     let (entity_mapping_pubkey, _) =
         Pubkey::find_program_address(&entity_mapping_seeds, &program.id());
+    let (blacklist_manager_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[
+            BLACKLIST_MANAGER_ROLE.as_ref(),
+            payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+    let (blacklist_manager_role_account_for_dummy_payer, _) = Pubkey::find_program_address(
+        &[
+            BLACKLIST_MANAGER_ROLE.as_ref(),
+            dummy_payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
 
-    // Non admin should not be able to call blacklist entity
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: blacklist_manager_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: BLACKLIST_MANAGER_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant blacklist manager role");
+
+    // Non blacklist manager should not be able to call blacklist entity
     program
         .request()
         .accounts(keyring_network::accounts::BlacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: dummy_payer.pubkey(),
+            blacklist_manager_role: blacklist_manager_role_account_for_dummy_payer,
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
@@ -61,13 +91,13 @@ fn test_blacklist_entity() {
         })
         .payer(&dummy_payer)
         .send()
-        .expect_err("Non-admin should not be able to blacklist entity");
+        .expect_err("Non-blacklist manager should not be able to blacklist entity");
 
     program
         .request()
         .accounts(keyring_network::accounts::BlacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
@@ -76,7 +106,7 @@ fn test_blacklist_entity() {
             trading_address,
         })
         .send()
-        .expect("Admin should be able to blacklist entity");
+        .expect("Blacklist manager should be able to blacklist entity");
 
     let entity_data: EntityData = program.account(entity_mapping_pubkey).unwrap();
     assert_eq!(
@@ -92,8 +122,8 @@ fn test_blacklist_entity() {
     program
         .request()
         .accounts(keyring_network::accounts::BlacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
@@ -102,7 +132,7 @@ fn test_blacklist_entity() {
             trading_address,
         })
         .send()
-        .expect("Admin should be able to blacklist entity");
+        .expect("Blacklist manager should be able to alredy blacklisted entity");
 
     let entity_data: EntityData = program.account(entity_mapping_pubkey).unwrap();
     assert_eq!(

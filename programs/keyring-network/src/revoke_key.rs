@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{KeyEntry, KeyRegistry, ProgramState, Role, ToHash, KEY_MANAGER_ROLE};
+use crate::common::types::{KeyEntry, KeyRegistry, Role, ToHash, KEY_MANAGER_ROLE};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -11,11 +11,6 @@ pub struct KeyRevoked {
 #[derive(Accounts)]
 #[instruction(key: Vec<u8>)]
 pub struct RevokeKey<'info> {
-    #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
     #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],

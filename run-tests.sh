@@ -16,7 +16,7 @@ sleep 5s
 anchor test test_revoke_key --skip-build
 sleep 5s
 
-anchor test test_set_admin --skip-build
+anchor test test_manage_roles --skip-build
 sleep 5s
 
 anchor test test_blacklist_entity --skip-build
