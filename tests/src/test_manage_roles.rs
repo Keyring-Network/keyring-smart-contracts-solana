@@ -31,6 +31,10 @@ fn test_manage_roles() {
     rpc.request_airdrop(&new_admin.pubkey(), 10 * LAMPORTS_PER_SOL)
         .unwrap();
 
+    let client2 =
+        Client::new_with_options(Cluster::Localnet, &new_admin, CommitmentConfig::confirmed());
+    let program2 = client2.program(program_id).unwrap();
+
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
     let (_, _, default_admin_role_pubkey) = init_program(&program, &payer, chain_id);
@@ -165,8 +169,6 @@ fn test_manage_roles() {
         .expect("Operator role account must exist after granting role");
     assert_eq!(role_account_data.has_role, true);
 
-    ////////////////////////////////////////////////////
-
     program
         .request()
         .accounts(keyring_network::accounts::ManageRole {
@@ -247,6 +249,71 @@ fn test_manage_roles() {
         .expect("Current admin must be able to revoke operator role");
 
     let role_account_data: Role = program
+        .account(operator_role_account_for_new_admin.clone())
+        .expect("Operator role account must exist even after revoking role");
+    assert_eq!(role_account_data.has_role, false);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    program2
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_account_for_new_admin,
+            role: key_manager_role_account_for_new_admin,
+            signer: new_admin.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: KEY_MANAGER_ROLE,
+            user: new_admin.pubkey(),
+            has_role: false,
+        })
+        .send()
+        .expect("Key manager must be able to revoke key manager role");
+
+    let role_account_data: Role = program2
+        .account(key_manager_role_account_for_new_admin.clone())
+        .expect("Key manager role account must exist event after revoking role");
+    assert_eq!(role_account_data.has_role, false);
+
+    program2
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_account_for_new_admin,
+            role: blacklist_manager_role_account_for_new_admin,
+            signer: new_admin.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: BLACKLIST_MANAGER_ROLE,
+            user: new_admin.pubkey(),
+            has_role: false,
+        })
+        .send()
+        .expect("Blacklist manager must be able to revoke blacklist manager role");
+
+    let role_account_data: Role = program2
+        .account(blacklist_manager_role_account_for_new_admin.clone())
+        .expect("Blacklist manager role account must exist even after revoking role");
+    assert_eq!(role_account_data.has_role, false);
+
+    program2
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_account_for_new_admin,
+            role: operator_role_account_for_new_admin,
+            signer: new_admin.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: OPERATOR_ROLE,
+            user: new_admin.pubkey(),
+            has_role: false,
+        })
+        .send()
+        .expect("Operator must be able to revoke operator role");
+
+    let role_account_data: Role = program2
         .account(operator_role_account_for_new_admin.clone())
         .expect("Operator role account must exist even after revoking role");
     assert_eq!(role_account_data.has_role, false);

@@ -15,6 +15,9 @@ pub struct RoleManaged {
 #[instruction(role_identifier: [u8; 32], user: Pubkey, has_role: bool)]
 pub struct ManageRole<'info> {
     #[account(
+        init_if_needed,
+        payer = signer,
+        space = 8 + Role::MAX_SIZE,
         seeds = [DEFAULT_ADMIN_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
         bump
     )]
@@ -38,7 +41,7 @@ pub fn do_manage_role(
     user: Pubkey,
     has_role: bool,
 ) -> Result<()> {
-    if !ctx.accounts.default_admin_role.has_role {
+    if !ctx.accounts.default_admin_role.has_role && has_role == true {
         return Err(error!(KeyringError::ErrCallerDoesNotHaveRole));
     }
 
