@@ -1,5 +1,7 @@
 use crate::common::error::KeyringError;
 use crate::common::types::ProgramState;
+use crate::common::types::Role;
+use crate::common::types::OPERATOR_ROLE;
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -18,6 +20,11 @@ pub struct CollectFees<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
+        seeds = [OPERATOR_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
+        bump
+    )]
+    pub operator_role: Account<'info, Role>,
+    #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
         bump
@@ -26,10 +33,8 @@ pub struct CollectFees<'info> {
 }
 
 pub fn do_collect_fees(ctx: Context<CollectFees>) -> Result<()> {
-    let signer_key = ctx.accounts.signer.key;
-
-    if !ctx.accounts.program_state.admin.eq(signer_key) {
-        return Err(error!(KeyringError::ErrCallerNotAdmin));
+    if !ctx.accounts.operator_role.has_role {
+        return Err(error!(KeyringError::ErrCallerDoesNotHaveRole));
     }
 
     let rent_sysvar = Rent::get()?;

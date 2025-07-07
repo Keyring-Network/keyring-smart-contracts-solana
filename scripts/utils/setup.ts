@@ -3,6 +3,13 @@ import * as idl from "../../target/idl/keyring_network.json";
 import { KeyringNetwork } from "../../target/types/keyring_network";
 
 import { Config } from "./types";
+import {
+    getDefaultAdminRolePda,
+    getKeyManagerRolePda,
+    getKeyMappingPda,
+    getKeyRegistryPda,
+    getProgramStatePda,
+} from "./getPda";
 
 async function setup(): Promise<Config> {
     const stringKeypair = process.env.KEYPAIR || "";
@@ -31,6 +38,35 @@ async function setup(): Promise<Config> {
         provider,
         program,
     };
+
+    const p = anchor.workspace as anchor.Program<KeyringNetwork>;
+    const key1 = Buffer.from([22]);
+    p.methods
+        .revokeKey(key1)
+        .accounts({
+            keyRegistry: getKeyRegistryPda(config.program.programId),
+            signer: config.provider.wallet.publicKey,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            keyManagerRole: getKeyManagerRolePda(
+                config.program.programId,
+                config.provider.wallet.publicKey
+            ),
+            keyMapping: getKeyMappingPda(key1, config.program.programId),
+        })
+        .rpc();
+    p.methods
+        .registerKey(key1, new anchor.BN(1), new anchor.BN(1))
+        .accounts({
+            keyRegistry: getKeyRegistryPda(config.program.programId),
+            signer: config.provider.wallet.publicKey,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            keyManagerRole: getKeyManagerRolePda(
+                config.program.programId,
+                config.provider.wallet.publicKey
+            ),
+            keyMapping: getKeyMappingPda(key1, config.program.programId),
+        })
+        .rpc();
 
     return config;
 }

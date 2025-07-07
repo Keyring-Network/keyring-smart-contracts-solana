@@ -14,7 +14,6 @@ pub struct ValidCredentials {
 pub struct CheckCredential<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
-
     #[account(
         seeds = [b"keyring_program".as_ref(), b"_entity_mapping".as_ref(), &policy_id.to_le_bytes(), &trading_address.to_bytes()],
         bump,

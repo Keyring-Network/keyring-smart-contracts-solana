@@ -6,11 +6,23 @@ use anchor_lang::solana_program::{
 };
 
 pub const CURRENT_VERSION: u8 = 1;
+pub const DEFAULT_ADMIN_ROLE: [u8; 32] = [0; 32];
+pub const KEY_MANAGER_ROLE: [u8; 32] = [
+    27, 30, 232, 100, 197, 54, 57, 215, 70, 43, 119, 63, 124, 139, 76, 234, 20, 166, 174, 54, 21,
+    116, 59, 147, 115, 163, 165, 135, 151, 112, 113, 28,
+];
+pub const BLACKLIST_MANAGER_ROLE: [u8; 32] = [
+    249, 136, 228, 251, 98, 184, 225, 79, 72, 32, 254, 208, 49, 146, 48, 109, 223, 77, 125, 191,
+    162, 21, 89, 91, 161, 198, 186, 75, 118, 179, 105, 238,
+];
+pub const OPERATOR_ROLE: [u8; 32] = [
+    151, 102, 112, 112, 197, 78, 241, 130, 176, 245, 133, 139, 3, 75, 234, 193, 182, 243, 8, 154,
+    162, 211, 24, 139, 177, 232, 146, 159, 79, 169, 185, 41,
+];
 
 #[account]
 pub struct ProgramState {
     pub version: u8,
-    pub admin: Pubkey,
     pub chain_id: ChainId,
 }
 
@@ -62,6 +74,16 @@ pub struct EntityData {
 
 impl EntityData {
     pub const MAX_SIZE: usize = 1 + 8 + 1;
+}
+
+#[account]
+#[derive(Debug, PartialEq)]
+pub struct Role {
+    pub has_role: bool,
+}
+
+impl Role {
+    pub const MAX_SIZE: usize = 8;
 }
 
 pub const CHAIN_ID_MAX_SIZE: usize = 41;

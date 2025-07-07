@@ -1,5 +1,7 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{ChainId, KeyRegistry, ProgramState, CURRENT_VERSION};
+use crate::common::types::{
+    ChainId, KeyRegistry, ProgramState, Role, CURRENT_VERSION, DEFAULT_ADMIN_ROLE,
+};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -27,6 +29,14 @@ pub struct Initialize<'info> {
         space = 8 + KeyRegistry::MAX_SIZE
     )]
     pub key_registry: Account<'info, KeyRegistry>,
+    #[account(
+        init,
+        payer = signer,
+        seeds = [DEFAULT_ADMIN_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
+        bump,
+        space = 8 + Role::MAX_SIZE
+    )]
+    pub default_admin_role: Account<'info, Role>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -37,9 +47,9 @@ pub fn do_initialize(ctx: Context<Initialize>, chain_id: Vec<u8>) -> Result<()> 
 
     *ctx.accounts.program_state = ProgramState {
         version: CURRENT_VERSION,
-        admin: ctx.accounts.signer.key.clone(),
         chain_id: chain_id.clone(),
     };
+    ctx.accounts.default_admin_role.has_role = true;
 
     emit!(Initialized {
         admin: ctx.accounts.signer.key.clone(),

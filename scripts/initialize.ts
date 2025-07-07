@@ -2,7 +2,11 @@ import * as anchor from "@coral-xyz/anchor";
 
 import { setup } from "./utils/setup";
 import { Config } from "./utils/types";
-import { getKeyRegistryPda, getProgramStatePda } from "./utils/getPda";
+import {
+    getDefaultAdminRolePda,
+    getKeyRegistryPda,
+    getProgramStatePda,
+} from "./utils/getPda";
 
 async function initialize() {
     const config: Config = await setup();
@@ -17,6 +21,10 @@ async function initialize() {
         .accounts({
             programState: getProgramStatePda(config.program.programId),
             keyRegistry: getKeyRegistryPda(config.program.programId),
+            defaultAdminRole: getDefaultAdminRolePda(
+                config.program.programId,
+                config.provider.wallet.publicKey
+            ),
             signer: config.provider.wallet.publicKey,
             systemProgram: anchor.web3.SystemProgram.programId,
         })

@@ -11,7 +11,9 @@ use anchor_client::{
     solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey},
     Client, Cluster,
 };
-use keyring_network::common::types::{ChainId, EntityData, ToHash, CURRENT_VERSION};
+use keyring_network::common::types::{
+    ChainId, EntityData, ToHash, BLACKLIST_MANAGER_ROLE, CURRENT_VERSION, KEY_MANAGER_ROLE,
+};
 use keyring_network::common::verify_auth_message::create_signature_payload;
 use keyring_network::ID as program_id;
 use libsecp256k1::{sign, Message};
@@ -37,7 +39,8 @@ fn create_credentials() {
 
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
-    let (program_state_pubkey, _) = init_program(&program, &payer, chain_id.clone());
+    let (program_state_pubkey, _, default_admin_role_pubkey) =
+        init_program(&program, &payer, chain_id.clone());
 
     let mut os_rng = OsRng::default();
     let secret_key = libsecp256k1::SecretKey::random(&mut os_rng);
@@ -54,15 +57,61 @@ fn create_credentials() {
         &[b"keyring_program".as_ref(), b"active_keys".as_ref()],
         &program.id(),
     );
+    let (key_manager_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[
+            KEY_MANAGER_ROLE.as_ref(),
+            payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+    let (blacklist_manager_role_account_for_admin, _) = Pubkey::find_program_address(
+        &[
+            BLACKLIST_MANAGER_ROLE.as_ref(),
+            payer.pubkey().to_bytes().as_ref(),
+        ],
+        &program.id(),
+    );
+
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: key_manager_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: KEY_MANAGER_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant key manager role");
+
+    program
+        .request()
+        .accounts(keyring_network::accounts::ManageRole {
+            default_admin_role: default_admin_role_pubkey,
+            role: blacklist_manager_role_account_for_admin,
+            signer: payer.pubkey(),
+            system_program: System::id(),
+        })
+        .args(keyring_network::instruction::ManageRoles {
+            role: BLACKLIST_MANAGER_ROLE,
+            user: payer.pubkey(),
+            has_role: true,
+        })
+        .send()
+        .expect("Current admin must be able to grant blacklist manager role");
 
     let timestamp = get_timestamp(&rpc);
     program
         .request()
         .accounts(keyring_network::accounts::RegisterKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RegisterKey {
@@ -409,8 +458,8 @@ fn create_credentials() {
     program
         .request()
         .accounts(keyring_network::accounts::BlacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
@@ -457,6 +506,7 @@ fn create_credentials() {
         .accounts(keyring_network::accounts::UnblacklistEntity {
             program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
+            blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),
             system_program: System::id(),
         })
@@ -501,10 +551,10 @@ fn create_credentials() {
     program
         .request()
         .accounts(keyring_network::accounts::RevokeKey {
-            program_state: program_state_pubkey.clone(),
             key_registry: key_registry.clone(),
             key_mapping: key_mapping_pubkey.clone(),
             signer: payer.pubkey(),
+            key_manager_role: key_manager_role_account_for_admin,
             system_program: System::id(),
         })
         .args(keyring_network::instruction::RevokeKey { key: key.clone() })

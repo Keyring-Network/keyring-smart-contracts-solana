@@ -1,6 +1,6 @@
 use crate::common::error::KeyringError;
 use crate::common::types::{
-    KeyEntry, KeyRegistry, ProgramState, ToHash, CURRENT_VERSION, MAX_ACTIVE_KEYS,
+    KeyEntry, KeyRegistry, Role, ToHash, CURRENT_VERSION, KEY_MANAGER_ROLE, MAX_ACTIVE_KEYS,
 };
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::secp256k1_recover::SECP256K1_PUBLIC_KEY_LENGTH;
@@ -17,11 +17,6 @@ pub struct KeyRegistered {
 #[instruction(key: Vec<u8>)]
 pub struct RegisterKey<'info> {
     #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
-    #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],
         bump,
@@ -29,6 +24,11 @@ pub struct RegisterKey<'info> {
     pub key_registry: Account<'info, KeyRegistry>,
     #[account(mut)]
     pub signer: Signer<'info>,
+    #[account(
+        seeds = [KEY_MANAGER_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
+        bump
+    )]
+    pub key_manager_role: Account<'info, Role>,
     #[account(
         init_if_needed,
         payer = signer,
@@ -46,10 +46,8 @@ pub fn do_register_key(
     valid_from: u64,
     valid_to: u64,
 ) -> Result<()> {
-    let signer_key = ctx.accounts.signer.key;
-
-    if !ctx.accounts.program_state.admin.eq(signer_key) {
-        return Err(error!(KeyringError::ErrCallerNotAdmin));
+    if !ctx.accounts.key_manager_role.has_role {
+        return Err(error!(KeyringError::ErrCallerDoesNotHaveRole));
     }
 
     let clock: Clock = Clock::get()?;

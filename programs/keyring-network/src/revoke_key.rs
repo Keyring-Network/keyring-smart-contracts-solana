@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{KeyEntry, KeyRegistry, ProgramState, ToHash};
+use crate::common::types::{KeyEntry, KeyRegistry, Role, ToHash, KEY_MANAGER_ROLE};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -12,11 +12,6 @@ pub struct KeyRevoked {
 #[instruction(key: Vec<u8>)]
 pub struct RevokeKey<'info> {
     #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
-    #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"active_keys".as_ref()],
         bump,
@@ -24,6 +19,11 @@ pub struct RevokeKey<'info> {
     pub key_registry: Account<'info, KeyRegistry>,
     #[account(mut)]
     pub signer: Signer<'info>,
+    #[account(
+        seeds = [KEY_MANAGER_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
+        bump
+    )]
+    pub key_manager_role: Account<'info, Role>,
     #[account(
         mut,
         seeds = [b"keyring_program".as_ref(), b"_key_mapping".as_ref(), &key.to_hash().as_ref()],
@@ -34,10 +34,8 @@ pub struct RevokeKey<'info> {
 }
 
 pub fn do_revoke_key(ctx: Context<RevokeKey>, key: Vec<u8>) -> Result<()> {
-    let signer_key = ctx.accounts.signer.key;
-
-    if !ctx.accounts.program_state.admin.eq(signer_key) {
-        return Err(error!(KeyringError::ErrCallerNotAdmin));
+    if !ctx.accounts.key_manager_role.has_role {
+        return Err(error!(KeyringError::ErrCallerDoesNotHaveRole));
     }
 
     ctx.accounts.key_mapping.is_valid = false;

@@ -1,5 +1,5 @@
 use crate::common::error::KeyringError;
-use crate::common::types::{EntityData, ProgramState, CURRENT_VERSION};
+use crate::common::types::{EntityData, Role, BLACKLIST_MANAGER_ROLE, CURRENT_VERSION};
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
 
@@ -12,14 +12,13 @@ pub struct BlacklistedEntity {
 #[derive(Accounts)]
 #[instruction(policy_id: u64, trading_address: Pubkey)]
 pub struct BlacklistEntity<'info> {
-    #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
     #[account(mut)]
     pub signer: Signer<'info>,
-
+    #[account(
+        seeds = [BLACKLIST_MANAGER_ROLE.as_ref(), signer.key().to_bytes().as_ref()],
+        bump
+    )]
+    pub blacklist_manager_role: Account<'info, Role>,
     #[account(
         init_if_needed,
         payer = signer,
@@ -36,10 +35,8 @@ pub fn do_blacklist_entity(
     policy_id: u64,
     trading_address: Pubkey,
 ) -> Result<()> {
-    let signer_key = ctx.accounts.signer.key;
-
-    if !ctx.accounts.program_state.admin.eq(signer_key) {
-        return Err(error!(KeyringError::ErrCallerNotAdmin));
+    if !ctx.accounts.blacklist_manager_role.has_role {
+        return Err(error!(KeyringError::ErrCallerDoesNotHaveRole));
     }
 
     if ctx.accounts.entity_mapping.blacklisted {
