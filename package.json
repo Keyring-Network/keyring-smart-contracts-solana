@@ -4,8 +4,7 @@
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "initialize": "npx tsx scripts/initialize.ts",
-    "setAdmin": "npx tsx scripts/setAdmin.ts",
-    "registerKey": "npx tsx scripts/registerKey.ts"
+    "manageRole": "npx tsx scripts/manageRole.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0"
