@@ -504,7 +504,6 @@ fn create_credentials() {
     program
         .request()
         .accounts(keyring_network::accounts::UnblacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),

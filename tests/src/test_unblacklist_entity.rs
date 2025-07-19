@@ -33,7 +33,7 @@ fn test_unblacklist_entity() {
 
     let mut rng = OsRng::default();
     let chain_id = generate_random_chain_id(&mut rng);
-    let (program_state_pubkey, _, default_admin_role_pubkey) =
+    let (_, _, default_admin_role_pubkey) =
         init_program(&program, &payer, chain_id);
 
     let policy_id: u64 = 1;
@@ -81,7 +81,6 @@ fn test_unblacklist_entity() {
     program
         .request()
         .accounts(keyring_network::accounts::UnblacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: dummy_payer.pubkey(),
             blacklist_manager_role: blacklist_manager_role_account_for_dummy_payer,
             entity_mapping: entity_mapping_pubkey.clone(),
@@ -99,7 +98,6 @@ fn test_unblacklist_entity() {
     program
         .request()
         .accounts(keyring_network::accounts::UnblacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),
@@ -151,7 +149,6 @@ fn test_unblacklist_entity() {
     program
         .request()
         .accounts(keyring_network::accounts::UnblacklistEntity {
-            program_state: program_state_pubkey.clone(),
             signer: payer.pubkey(),
             blacklist_manager_role: blacklist_manager_role_account_for_admin,
             entity_mapping: entity_mapping_pubkey.clone(),

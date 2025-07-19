@@ -3,7 +3,6 @@ import * as anchor from "@coral-xyz/anchor";
 import { setup } from "./utils/setup";
 import { Config } from "./utils/types";
 import {
-    getProgramStatePda,
     getKeyMappingPda,
     getKeyRegistryPda,
     getKeyManagerRolePda,

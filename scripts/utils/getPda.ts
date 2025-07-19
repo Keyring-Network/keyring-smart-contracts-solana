@@ -71,6 +71,21 @@ const getKeyMappingPda = (
         programId
     )[0];
 
+const getEntityMappingPda = (
+    policyId: anchor.BN,
+    user: anchor.web3.PublicKey,
+    programId: anchor.web3.PublicKey
+) =>
+    anchor.web3.PublicKey.findProgramAddressSync(
+        [
+            Buffer.from("keyring_program"),
+            Buffer.from("_entity_mapping"),
+            policyId.toBuffer("le"),
+            user.toBuffer(),
+        ],
+        programId
+    )[0];
+
 export {
     getProgramStatePda,
     getDefaultAdminRolePda,
@@ -79,4 +94,5 @@ export {
     getOperatorRolePda,
     getKeyRegistryPda,
     getKeyMappingPda,
+    getEntityMappingPda,
 };

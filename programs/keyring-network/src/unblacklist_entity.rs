@@ -1,6 +1,6 @@
 use crate::common::error::KeyringError;
 use crate::common::types::{
-    EntityData, ProgramState, Role, BLACKLIST_MANAGER_ROLE, CURRENT_VERSION,
+    EntityData, Role, BLACKLIST_MANAGER_ROLE, CURRENT_VERSION,
 };
 use anchor_lang::prelude::*;
 use anchor_lang::Accounts;
@@ -14,11 +14,6 @@ pub struct UnBlackListedEntity {
 #[derive(Accounts)]
 #[instruction(policy_id: u64, trading_address: Pubkey)]
 pub struct UnblacklistEntity<'info> {
-    #[account(
-        seeds = [b"keyring_program".as_ref(), b"global_state".as_ref()],
-        bump
-    )]
-    pub program_state: Account<'info, ProgramState>,
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
