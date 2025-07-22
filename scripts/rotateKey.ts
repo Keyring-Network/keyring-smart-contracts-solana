@@ -50,7 +50,7 @@ async function rotateKey() {
             })
             .rpc();
     }
-    const txSignature2 = config.program.methods
+    const txSignature2 = await config.program.methods
         .registerKey(key, new anchor.BN(validFrom), new anchor.BN(validUntil))
         .accounts({
             keyRegistry: getKeyRegistryPda(config.program.programId),
